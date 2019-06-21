@@ -76,7 +76,7 @@ namespace BrokenNodeDetector {
             brokenNodesLabel = mainPanel.AddUIComponent<UILabel>();
             brokenNodesLabel.autoSize = true;
             brokenNodesLabel.padding = new RectOffset(10, 10, 15, 15);
-            brokenNodesLabel.relativePosition = new Vector2(10, 120);
+            brokenNodesLabel.relativePosition = new Vector2(75, 120);
 
             moveNextButton = mainPanel.AddUIComponent<UIButton>();
             moveNextButton.eventClick += MoveNextBrokeNodeButtonClick;
@@ -128,14 +128,16 @@ namespace BrokenNodeDetector {
             }
             //TODO add reset to repeat cycling from start again
         }
-        private void OnBeforeStart() {
+        private void OnBeforeStart() {            
+            brokenNodesLabel.relativePosition = new Vector2(75, 120);
+            brokenNodesLabel.Hide();
+
             mainPanel.height = 130;
             startButton.Hide();
             progressBar.value = 0;
             progressBar.Show();
 
             moveNextButton.Hide();
-            brokenNodesLabel.Hide();
         }
 
         private void OnAfterStop() {
@@ -147,8 +149,10 @@ namespace BrokenNodeDetector {
 
         private void OnClose() {
             mainPanel.height = 130;
+            brokenNodesLabel.relativePosition = new Vector2(75, 120);
             brokenNodesLabel.text = "";
             brokenNodesLabel.Hide();
+            moveNextButton.Hide();
             Hide();
         }
 
@@ -175,6 +179,7 @@ namespace BrokenNodeDetector {
                 mainPanel.height = 160;
                 Debug.Log("BrokenNodeDetector - nothing found");
             } else {
+                brokenNodesLabel.relativePosition = new Vector2(10, 120);
                 brokenNodesLabel.text = $"Found {ModService.Instance.Results.Count} possibly broken nodes\n" +
                                         "1. Click on 'Move next' to show node location\n" +
                                         "2. Rebuild or remove node\n" +
