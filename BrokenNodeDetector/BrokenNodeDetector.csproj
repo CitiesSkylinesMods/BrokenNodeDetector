@@ -35,7 +35,24 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BrokenNodeDetector.cs" />
+    <Compile Include="LoadingExtension.cs" />
+    <Compile Include="ModService.cs" />
+    <Compile Include="Patch\_NetNode\UpdateLaneConnectionPatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RedirectionFramework\AssemblyRedirector.cs" />
+    <Compile Include="RedirectionFramework\Attributes\IgnoreConditionAttribute.cs" />
+    <Compile Include="RedirectionFramework\Attributes\IgnoreConditions\DisableAttribute.cs" />
+    <Compile Include="RedirectionFramework\Attributes\RedirectAttribute.cs" />
+    <Compile Include="RedirectionFramework\Attributes\RedirectMethodAttribute.cs" />
+    <Compile Include="RedirectionFramework\Attributes\RedirectReverseAttribute.cs" />
+    <Compile Include="RedirectionFramework\Attributes\TargetTypeAttribute.cs" />
+    <Compile Include="RedirectionFramework\Extensions\TypeExtension.cs" />
+    <Compile Include="RedirectionFramework\RedirectionHelper.cs" />
+    <Compile Include="RedirectionFramework\RedirectionUtil.cs" />
+    <Compile Include="RedirectionFramework\Redirector.cs" />
+    <Compile Include="RedirectionFramework\Tuple.cs" />
+    <Compile Include="UI\MainPanel.cs" />
+    <Compile Include="UI\MainUI.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
@@ -62,6 +79,14 @@
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\Dependencies\UnityEngine.UI.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="RedirectionFramework\.git" />
+    <Content Include="RedirectionFramework\.gitignore" />
+    <Content Include="RedirectionFramework\LICENSE" />
+    <Content Include="RedirectionFramework\README.md" />
+    <Content Include="RedirectionFramework\RedirectionFramework.csproj" />
+    <Content Include="RedirectionFramework\RedirectionFramework.sln" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
