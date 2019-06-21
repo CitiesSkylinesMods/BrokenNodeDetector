@@ -89,4 +89,13 @@
     <Content Include="RedirectionFramework\RedirectionFramework.sln" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+      set "DEPLOYDIR=$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\"
+
+      del /Q "%25DEPLOYDIR%25*"
+      xcopy /y "$(TargetDir)BrokenNodeDetector.dll" "%25DEPLOYDIR%25"
+
+      set DEPLOYDIR=</PostBuildEvent>
+  </PropertyGroup>
 </Project>

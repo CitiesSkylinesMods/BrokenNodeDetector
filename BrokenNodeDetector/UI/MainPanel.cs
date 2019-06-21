@@ -9,7 +9,6 @@ using UnityEngine;
 
 namespace BrokenNodeDetector {
     public class MainPanel : UIPanel {
-        private readonly SavedInputKey _escKey = new SavedInputKey("Close detector", MainUI.FILE_NAME, KeyCode.Escape, false, false, false, true);
         
         private UILabel title;
         private UILabel brokenNodesLabel;
@@ -37,8 +36,7 @@ namespace BrokenNodeDetector {
             mainPanel.width = 400;
             mainPanel.height = 130;
 
-            Vector2 resolution = UIView.GetAView().GetScreenResolution();
-            relativePosition = new Vector3(resolution.x / 2 - 300, resolution.y / 5);
+            relativePosition = new Vector3(250, 20);
             mainPanel.relativePosition = Vector3.zero;
 
             title = mainPanel.AddUIComponent<UILabel>();
@@ -76,7 +74,7 @@ namespace BrokenNodeDetector {
             brokenNodesLabel = mainPanel.AddUIComponent<UILabel>();
             brokenNodesLabel.autoSize = true;
             brokenNodesLabel.padding = new RectOffset(10, 10, 15, 15);
-            brokenNodesLabel.relativePosition = new Vector2(75, 120);
+            brokenNodesLabel.relativePosition = new Vector2(95, 120);
 
             moveNextButton = mainPanel.AddUIComponent<UIButton>();
             moveNextButton.eventClick += MoveNextBrokeNodeButtonClick;
@@ -88,12 +86,6 @@ namespace BrokenNodeDetector {
             moveNextButton.pressedBgSprite = "ButtonMenu";
             moveNextButton.text = "Move to next broken node";
             moveNextButton.Hide();
-        }
-
-        private void OnGUI() {
-            if (isVisible && _escKey.IsPressed()) {
-                closeButton.SimulateClick();
-            }
         }
 
         private void CloseButtonClick(UIComponent component, UIMouseEventParameter eventparam) {
@@ -129,7 +121,7 @@ namespace BrokenNodeDetector {
             //TODO add reset to repeat cycling from start again
         }
         private void OnBeforeStart() {            
-            brokenNodesLabel.relativePosition = new Vector2(75, 120);
+            brokenNodesLabel.relativePosition = new Vector2(95, 120);
             brokenNodesLabel.Hide();
 
             mainPanel.height = 130;
@@ -149,7 +141,7 @@ namespace BrokenNodeDetector {
 
         private void OnClose() {
             mainPanel.height = 130;
-            brokenNodesLabel.relativePosition = new Vector2(75, 120);
+            brokenNodesLabel.relativePosition = new Vector2(95, 120);
             brokenNodesLabel.text = "";
             brokenNodesLabel.Hide();
             moveNextButton.Hide();
