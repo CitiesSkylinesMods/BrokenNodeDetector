@@ -10,82 +10,82 @@ using UnityEngine;
 namespace BrokenNodeDetector {
     public class MainPanel : UIPanel {
         
-        private UILabel title;
-        private UILabel brokenNodesLabel;
-        private UIButton closeButton;
-        private UIButton startButton;
-        private UIButton moveNextButton;
-        private UIPanel mainPanel;
-        private UIProgressBar progressBar;
+        private UILabel _title;
+        private UILabel _brokenNodesLabel;
+        private UIButton _closeButton;
+        private UIButton _startButton;
+        private UIButton _moveNextButton;
+        private UIPanel _mainPanel;
+        private UIProgressBar _progressBar;
 
-        private List<ushort> invalidNodes;
+        private List<ushort> _invalidNodes;
 
         private List<ushort>.Enumerator _invalidNodesEnumerator;
 
         public void Initailize() {
-            if (mainPanel != null) {
-                mainPanel.OnDestroy();
+            if (_mainPanel != null) {
+                _mainPanel.OnDestroy();
             }
 
             isVisible = false;
-            mainPanel = AddUIComponent<UIPanel>();
-            mainPanel.backgroundSprite = "UnlockingPanel2";
-            mainPanel.color = new Color32(75, 75, 135, 255);
+            _mainPanel = AddUIComponent<UIPanel>();
+            _mainPanel.backgroundSprite = "UnlockingPanel2";
+            _mainPanel.color = new Color32(75, 75, 135, 255);
             width = 400;
             height = 130;
-            mainPanel.width = 400;
-            mainPanel.height = 130;
+            _mainPanel.width = 400;
+            _mainPanel.height = 130;
 
             relativePosition = new Vector3(250, 20);
-            mainPanel.relativePosition = Vector3.zero;
+            _mainPanel.relativePosition = Vector3.zero;
 
-            title = mainPanel.AddUIComponent<UILabel>();
-            title.autoSize = true;
-            title.padding = new RectOffset(10, 10, 15, 15);
-            title.relativePosition = new Vector2(100, 12);
-            title.text = "Broken node detector";
+            _title = _mainPanel.AddUIComponent<UILabel>();
+            _title.autoSize = true;
+            _title.padding = new RectOffset(10, 10, 15, 15);
+            _title.relativePosition = new Vector2(100, 12);
+            _title.text = "Broken node detector";
 
-            closeButton = mainPanel.AddUIComponent<UIButton>();
-            closeButton.eventClick += CloseButtonClick;
-            closeButton.relativePosition = new Vector3(width - closeButton.width - 45, 15f);
-            closeButton.normalBgSprite = "buttonclose";
-            closeButton.hoveredBgSprite = "buttonclosehover";
-            closeButton.pressedBgSprite = "buttonclosepressed";
+            _closeButton = _mainPanel.AddUIComponent<UIButton>();
+            _closeButton.eventClick += CloseButtonClick;
+            _closeButton.relativePosition = new Vector3(width - _closeButton.width - 45, 15f);
+            _closeButton.normalBgSprite = "buttonclose";
+            _closeButton.hoveredBgSprite = "buttonclosehover";
+            _closeButton.pressedBgSprite = "buttonclosepressed";
 
 
-            startButton = mainPanel.AddUIComponent<UIButton>();
-            startButton.eventClick += StartButtonClick;
-            startButton.relativePosition = new Vector3(width / 2 - 64, 60f);
-            startButton.width = 128;
-            startButton.height = 48;
-            startButton.normalBgSprite = "ButtonMenu";
-            startButton.hoveredBgSprite = "ButtonMenu";
-            startButton.pressedBgSprite = "ButtonMenu";
-            startButton.text = "Run detector";
+            _startButton = _mainPanel.AddUIComponent<UIButton>();
+            _startButton.eventClick += StartButtonClick;
+            _startButton.relativePosition = new Vector3(width / 2 - 64, 60f);
+            _startButton.width = 128;
+            _startButton.height = 48;
+            _startButton.normalBgSprite = "ButtonMenu";
+            _startButton.hoveredBgSprite = "ButtonMenu";
+            _startButton.pressedBgSprite = "ButtonMenu";
+            _startButton.text = "Run detector";
 
-            progressBar = mainPanel.AddUIComponent<UIProgressBar>();
-            progressBar.relativePosition = new Vector3(50, 75);
-            progressBar.width = 300;
-            progressBar.height = 25;
-            progressBar.fillMode = UIFillMode.Fill;
-            progressBar.progressSprite = "ProgressBarFill";
-            progressBar.isVisible = false;
+            _progressBar = _mainPanel.AddUIComponent<UIProgressBar>();
+            _progressBar.relativePosition = new Vector3(50, 75);
+            _progressBar.width = 300;
+            _progressBar.height = 25;
+            _progressBar.fillMode = UIFillMode.Fill;
+            _progressBar.progressSprite = "ProgressBarFill";
+            _progressBar.isVisible = false;
 
-            brokenNodesLabel = mainPanel.AddUIComponent<UILabel>();
-            brokenNodesLabel.autoSize = true;
-            brokenNodesLabel.padding = new RectOffset(10, 10, 15, 15);
-            brokenNodesLabel.relativePosition = new Vector2(95, 120);
+            _brokenNodesLabel = _mainPanel.AddUIComponent<UILabel>();
+            _brokenNodesLabel.autoSize = true;
+            _brokenNodesLabel.padding = new RectOffset(10, 10, 15, 15);
+            _brokenNodesLabel.relativePosition = new Vector2(95, 120);
 
-            moveNextButton = mainPanel.AddUIComponent<UIButton>();
-            moveNextButton.eventClick += MoveNextBrokeNodeButtonClick;
-            moveNextButton.relativePosition = new Vector3(75, 240f);
-            moveNextButton.width = 250;
-            moveNextButton.height = 48;
-            moveNextButton.normalBgSprite = "ButtonMenu";
-            moveNextButton.hoveredBgSprite = "ButtonMenu";
-            moveNextButton.pressedBgSprite = "ButtonMenu";
-            moveNextButton.text = "Move to next broken node";
-            moveNextButton.Hide();
+            _moveNextButton = _mainPanel.AddUIComponent<UIButton>();
+            _moveNextButton.eventClick += MoveNextBrokeNodeButtonClick;
+            _moveNextButton.relativePosition = new Vector3(75, 240f);
+            _moveNextButton.width = 250;
+            _moveNextButton.height = 48;
+            _moveNextButton.normalBgSprite = "ButtonMenu";
+            _moveNextButton.hoveredBgSprite = "ButtonMenu";
+            _moveNextButton.pressedBgSprite = "ButtonMenu";
+            _moveNextButton.text = "Move to next broken node";
+            _moveNextButton.Hide();
         }
 
         private void CloseButtonClick(UIComponent component, UIMouseEventParameter eventparam) {
@@ -106,7 +106,7 @@ namespace BrokenNodeDetector {
         }
 
         private void MoveNextBrokeNodeButtonClick(UIComponent component, UIMouseEventParameter eventparam) {
-            if (invalidNodes == null || invalidNodes.Count == 0) return;
+            if (_invalidNodes == null || _invalidNodes.Count == 0) return;
             
             InstanceID instanceId = default;
             ushort nextNodeId = 0; 
@@ -121,36 +121,36 @@ namespace BrokenNodeDetector {
             //TODO add reset to repeat cycling from start again
         }
         private void OnBeforeStart() {            
-            brokenNodesLabel.relativePosition = new Vector2(95, 120);
-            brokenNodesLabel.Hide();
+            _brokenNodesLabel.relativePosition = new Vector2(95, 120);
+            _brokenNodesLabel.Hide();
 
-            mainPanel.height = 130;
-            startButton.Hide();
-            progressBar.value = 0;
-            progressBar.Show();
+            _mainPanel.height = 130;
+            _startButton.Hide();
+            _progressBar.value = 0;
+            _progressBar.Show();
 
-            moveNextButton.Hide();
+            _moveNextButton.Hide();
         }
 
         private void OnAfterStop() {
-            startButton.Show();
-            brokenNodesLabel.Show();
+            _startButton.Show();
+            _brokenNodesLabel.Show();
 
-            progressBar.Hide();
+            _progressBar.Hide();
         }
 
         private void OnClose() {
-            mainPanel.height = 130;
-            brokenNodesLabel.relativePosition = new Vector2(95, 120);
-            brokenNodesLabel.text = "";
-            brokenNodesLabel.Hide();
-            moveNextButton.Hide();
+            _mainPanel.height = 130;
+            _brokenNodesLabel.relativePosition = new Vector2(95, 120);
+            _brokenNodesLabel.text = "";
+            _brokenNodesLabel.Hide();
+            _moveNextButton.Hide();
             Hide();
         }
 
         IEnumerator Countdown(int seconds, Action action) {
             int counter = seconds;
-            progressBar.maxValue = seconds;
+            _progressBar.maxValue = seconds;
             while (counter > 0) {
                 UpdateProgressBar(counter);
                 yield return new WaitForSeconds(1);
@@ -161,27 +161,27 @@ namespace BrokenNodeDetector {
         }
 
         private void UpdateProgressBar(int value) {
-            float currentValue = progressBar.maxValue - value + 1;
-            progressBar.value = currentValue;
+            float currentValue = _progressBar.maxValue - value + 1;
+            _progressBar.value = currentValue;
         }
 
         private void ShowResults() {
             if (ModService.Instance.Results.Count == 0) {
-                brokenNodesLabel.text = "Great! Nothing found :-)";
-                mainPanel.height = 160;
+                _brokenNodesLabel.text = "Great! Nothing found :-)";
+                _mainPanel.height = 160;
                 Debug.Log("BrokenNodeDetector - nothing found");
             } else {
-                brokenNodesLabel.relativePosition = new Vector2(10, 120);
-                brokenNodesLabel.text = $"Found {ModService.Instance.Results.Count} possibly broken nodes\n" +
+                _brokenNodesLabel.relativePosition = new Vector2(10, 120);
+                _brokenNodesLabel.text = $"Found {ModService.Instance.Results.Count} possibly broken nodes\n" +
                                         "1. Click on 'Move next' to show node location\n" +
-                                        "2. Rebuild or remove node\n" +
+                                        "2. Move node or rebuild path segment\n" +
                                         "3. Repeat 1-2 until nothing new found\n" +
                                         "Run detector again if you want :)";
-                invalidNodes = ModService.Instance.Results;
-                Debug.Log($"BrokenNodeDetector found {invalidNodes.Count} nodes. ({string.Join(",", invalidNodes.Select(i=> i.ToString()).ToArray())})");
-                _invalidNodesEnumerator = invalidNodes.GetEnumerator();
-                moveNextButton.Show();
-                mainPanel.height = 300;
+                _invalidNodes = ModService.Instance.Results;
+                Debug.Log($"BrokenNodeDetector found {_invalidNodes.Count} nodes. ({string.Join(",", _invalidNodes.Select(i=> i.ToString()).ToArray())})");
+                _invalidNodesEnumerator = _invalidNodes.GetEnumerator();
+                _moveNextButton.Show();
+                _mainPanel.height = 300;
             }
         }
     }
