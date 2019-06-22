@@ -9,7 +9,6 @@ using UnityEngine;
 
 namespace BrokenNodeDetector {
     public class MainPanel : UIPanel {
-        
         private UILabel _title;
         private UILabel _brokenNodesLabel;
         private UIButton _closeButton;
@@ -21,6 +20,8 @@ namespace BrokenNodeDetector {
         private List<ushort> _invalidNodes;
 
         private List<ushort>.Enumerator _invalidNodesEnumerator;
+
+        private readonly List<ushort> _markedForRemoval = new List<ushort>();
 
         public void Initailize() {
             if (_mainPanel != null) {
@@ -106,21 +107,40 @@ namespace BrokenNodeDetector {
         }
 
         private void MoveNextBrokeNodeButtonClick(UIComponent component, UIMouseEventParameter eventparam) {
+            
             if (_invalidNodes == null || _invalidNodes.Count == 0) return;
             
             InstanceID instanceId = default;
-            ushort nextNodeId = 0; 
+            ushort nextNodeId = 0;
             if (_invalidNodesEnumerator.MoveNext()) {
                 nextNodeId = _invalidNodesEnumerator.Current;
             }
-
+            
+            if (nextNodeId == 0) return;
+            
             instanceId.NetNode = nextNodeId;
             if (InstanceManager.IsValid(instanceId)) {
                 ToolsModifierControl.cameraController.SetTarget(instanceId, ToolsModifierControl.cameraController.transform.position, true);
+            } else {
+                _markedForRemoval.Add(nextNodeId);
+                _moveNextButton.SimulateClick();
             }
-            //TODO add reset to repeat cycling from start again
+
+            //reset cycle
+            if (_invalidNodes.IndexOf(nextNodeId) == _invalidNodes.Count - 1) {
+                for (int i = 0; i < _markedForRemoval.Count; i++) {
+                    _invalidNodes.Remove(_markedForRemoval[i]);
+                }
+
+                _markedForRemoval.Clear();
+                if (_invalidNodes.Count == 0) return;
+                
+                _invalidNodesEnumerator = _invalidNodes.GetEnumerator();
+            }
         }
-        private void OnBeforeStart() {            
+
+        private void OnBeforeStart() {
+            _markedForRemoval.Clear();
             _brokenNodesLabel.relativePosition = new Vector2(95, 120);
             _brokenNodesLabel.Hide();
 
@@ -173,12 +193,12 @@ namespace BrokenNodeDetector {
             } else {
                 _brokenNodesLabel.relativePosition = new Vector2(10, 120);
                 _brokenNodesLabel.text = $"Found {ModService.Instance.Results.Count} possibly broken nodes\n" +
-                                        "1. Click on 'Move next' to show node location\n" +
-                                        "2. Move node or rebuild path segment\n" +
-                                        "3. Repeat 1-2 until nothing new found\n" +
-                                        "Run detector again if you want :)";
+                                         "1. Click on 'Move next' to show node location\n" +
+                                         "2. Move node or rebuild path segment\n" +
+                                         "3. Repeat 1-2 until nothing new found\n" +
+                                         "Run detector again if you want :)";
                 _invalidNodes = ModService.Instance.Results;
-                Debug.Log($"BrokenNodeDetector found {_invalidNodes.Count} nodes. ({string.Join(",", _invalidNodes.Select(i=> i.ToString()).ToArray())})");
+                Debug.Log($"BrokenNodeDetector found {_invalidNodes.Count} nodes. ({string.Join(",", _invalidNodes.Select(i => i.ToString()).ToArray())})");
                 _invalidNodesEnumerator = _invalidNodes.GetEnumerator();
                 _moveNextButton.Show();
                 _mainPanel.height = 300;
