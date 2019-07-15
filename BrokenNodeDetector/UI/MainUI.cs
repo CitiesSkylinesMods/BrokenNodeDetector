@@ -31,7 +31,11 @@ namespace BrokenNodeDetector {
 
         public override void OnDestroy() {
             base.OnDestroy();
-            MainPanel.OnDestroy();
+            if (MainPanel != null) {
+                Destroy(MainPanel);
+                MainPanel = null;
+                MainKey = null;
+            }
         }
     }
 }
