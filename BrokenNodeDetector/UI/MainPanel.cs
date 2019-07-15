@@ -189,7 +189,7 @@ namespace BrokenNodeDetector {
             if (ModService.Instance.Results.Count == 0) {
                 _brokenNodesLabel.text = "Great! Nothing found :-)";
                 _mainPanel.height = 160;
-                Debug.Log("BrokenNodeDetector - nothing found");
+                Debug.Log("[BND] Nothing found :-)");
             } else {
                 _brokenNodesLabel.relativePosition = new Vector2(10, 120);
                 _brokenNodesLabel.text = $"Found {ModService.Instance.Results.Count} possibly broken nodes\n" +
@@ -198,10 +198,17 @@ namespace BrokenNodeDetector {
                                          "3. Repeat 1-2 until nothing new found\n" +
                                          "Run detector again if you want :)";
                 _invalidNodes = ModService.Instance.Results;
-                Debug.Log($"BrokenNodeDetector found {_invalidNodes.Count} nodes. ({string.Join(",", _invalidNodes.Select(i => i.ToString()).ToArray())})");
+                Debug.Log($"[BND] Found {_invalidNodes.Count} nodes. ({string.Join(",", _invalidNodes.Select(i => i.ToString()).ToArray())})");
                 _invalidNodesEnumerator = _invalidNodes.GetEnumerator();
                 _moveNextButton.Show();
                 _mainPanel.height = 300;
+            }
+        }
+
+        private new void OnDestroy() {
+            base.OnDestroy();
+            if (_mainPanel != null) {
+                Destroy(_mainPanel);
             }
         }
     }
