@@ -15,6 +15,11 @@ __Hit _Ctrl+Zero_ to show mod menu in-game.__
 - Move camera to broken node
 
 # Changelog
+### [0.3](https://github.com/krzychu124/BrokenNodeDetector/compare/0.2...0.3), 15/07/2019
+
+- `NullReferenceException` bug fix (thanks aubergine10) (#2)
+- code cleanup
+
 ### [0.2](https://github.com/krzychu124/BrokenNodeDetector/compare/0.1...0.2), 22/06/2019
 _New feature:_
 - cycle through broken nodes (automatically skip removed or invalid). No need to re-run detector
