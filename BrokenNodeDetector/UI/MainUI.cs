@@ -2,7 +2,7 @@ using ColossalFramework;
 using ColossalFramework.UI;
 using UnityEngine;
 
-namespace BrokenNodeDetector {
+namespace BrokenNodeDetector.UI {
     public class MainUI : UIComponent {
         public static string FILE_NAME { get; } = "BrokenNodeDetector";
 
@@ -13,7 +13,7 @@ namespace BrokenNodeDetector {
             var uiView = UIView.GetAView();
 
             MainPanel = (MainPanel) uiView.AddUIComponent(typeof(MainPanel));
-            MainPanel.Initailize();
+            MainPanel.Initialize();
             MainKey = new SavedInputKey("BrokeNodeDetectorMenu", FILE_NAME, KeyCode.Alpha0, true, false, false, true);
         }
 

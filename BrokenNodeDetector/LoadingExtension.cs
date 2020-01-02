@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using BrokenNodeDetector.UI;
 using ColossalFramework;
 using ColossalFramework.UI;
 using ICities;
