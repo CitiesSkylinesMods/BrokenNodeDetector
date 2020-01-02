@@ -31,7 +31,7 @@ namespace BrokenNodeDetector {
         public IEnumerator SearchForGhostNodes() {
             Debug.Log("[BND] Searching for ghost nodes");
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Ghost/broken nodes: ");
+            sb.AppendLine("Ghost/broken nodes list: ");
             LastGhostNodesCount = 0;
             for (var i = 0; i < NetManager.instance.m_nodes.m_buffer.Length; i++) {
                 NetNode node = NetManager.instance.m_nodes.m_buffer[i];
@@ -45,6 +45,7 @@ namespace BrokenNodeDetector {
                 }
             }
 
+            sb.AppendLine("=================================================");
             Debug.Log("[BND] Searching finished. Found and released " + LastGhostNodesCount + " ghost nodes");
             Debug.Log(sb);
             yield return null;
