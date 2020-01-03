@@ -15,6 +15,18 @@ __Hit _Ctrl+Zero_ to show mod menu in-game.__
 - Move camera to broken node
 
 # Changelog
+### [0.4](https://github.com/krzychu124/BrokenNodeDetector/compare/0.3...0.4), 03/01/2020
+
+- ghost nodes detector(with auto-remove)
+- detector for public transport line and stop issues: 
+  - detect empty lines,
+  - detect incomplete lines,
+  - detect not connected stops,
+  - cycle through not connected stops,
+  - remove selected stop,
+  - remove selected line,
+- improved logging
+
 ### [0.3](https://github.com/krzychu124/BrokenNodeDetector/compare/0.2...0.3), 15/07/2019
 
 - `NullReferenceException` bug fix (thanks aubergine10) (#2)
