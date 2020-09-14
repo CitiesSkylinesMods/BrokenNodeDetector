@@ -1,19 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+using BrokenNodeDetector.Patch._NetNode;
 using BrokenNodeDetector.UI;
+using CitiesHarmony.API;
 using ColossalFramework;
 using ColossalFramework.UI;
+using HarmonyLib;
 using ICities;
-using OtherCSMods.RedirectionFramework;
-using RedirectionFramework;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace BrokenNodeDetector {
     public class LoadingExtension : LoadingExtensionBase {
         public bool DetourInited { get; private set; }
         public static MainUI MainUi { get; private set; }
-        public static IDictionary<MethodInfo, RedirectCallsState> DetouredMethodStates { get; private set; } = new Dictionary<MethodInfo, RedirectCallsState>();
 
         public override void OnLevelLoaded(LoadMode mode) {
             base.OnLevelLoaded(mode);
@@ -24,7 +23,7 @@ namespace BrokenNodeDetector {
                 InitDetours();
             }
 
-            if (MainUi == null) {
+            if (!MainUi) {
                 MainUi = (MainUI) UIView.GetAView().AddUIComponent(typeof(MainUI));
             }
         }
@@ -33,20 +32,19 @@ namespace BrokenNodeDetector {
             base.OnLevelUnloading();
 
             RevertDetours();
-            if (MainUi != null) {
-                UnityEngine.Object.Destroy(MainUi);
+            if (MainUi) {
+                Object.Destroy(MainUi);
                 MainUi = null;
             }
         }
 
         private void InitDetours() {
-            if (DetourInited) return;
+            if (DetourInited || !HarmonyHelper.IsHarmonyInstalled) return;
 
             bool detourFailed = false;
             try {
                 Debug.Log("[BND] Deploying manual detours");
-
-                DetouredMethodStates = AssemblyRedirector.Deploy();
+                Patcher.PatchAll();
             } catch (Exception e) {
                 Debug.LogError("[BND] Could not deploy manual detours for Broken Nodes Detector");
                 Debug.Log(e.ToString());
@@ -68,9 +66,30 @@ namespace BrokenNodeDetector {
         private void RevertDetours() {
             if (!DetourInited) return;
 
-            AssemblyRedirector.Revert();
-
+            Patcher.UnpatchAll();
             DetourInited = false;
+        }
+        
+        internal static class Patcher {
+            private const string HarmonyId = "yourname.YourModName";
+            private static bool patched = false;
+
+            public static void PatchAll() {
+                if (patched) return;
+
+                patched = true;
+                var harmony = new Harmony(HarmonyId);
+                harmony.Patch(typeof(NetNode).GetMethod(nameof(NetNode.UpdateLaneConnection)),
+                              postfix: new HarmonyMethod(typeof(CustomNetNode), nameof(CustomNetNode.Postfix)));
+            }
+
+            public static void UnpatchAll() {
+                if (!patched) return;
+
+                var harmony = new Harmony(HarmonyId);
+                harmony.UnpatchAll(HarmonyId);
+                patched = false;
+            }
         }
 
     }
