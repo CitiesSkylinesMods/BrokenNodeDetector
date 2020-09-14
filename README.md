@@ -4,7 +4,7 @@ Locates invisible problems with your transport system and helps fix them.
 
 ![Mod Panel](https://user-images.githubusercontent.com/1386719/72827820-63b60400-3c73-11ea-9f24-740eb4dd8da7.png)
 
-Press **Ctrl+Zero** in-game to display the mod panel_(configurable in mod options)_.
+Press **Ctrl+Zero** in-game to display the mod panel _(configurable in mod options)_.
 
 ## Fix broken nodes
 
