@@ -126,6 +126,7 @@ namespace BrokenNodeDetector.UI {
             _brokenStopsNumber.relativePosition = new Vector2(10, 58);
 
             _linePanel.Hide();
+            absolutePosition = new Vector3(250, 30);
         }
 
         private void CloseButtonClick(UIComponent component, UIMouseEventParameter eventparam) {

@@ -18,6 +18,8 @@ namespace BrokenNodeDetector {
         public float SearchProgress { get; private set; }
         public float SearchStep { get; private set; }
         public bool SearchInProgress { get; private set; }
+        
+        public bool KeybindEditInProgress { get; private set; }
 
         static ModService() {
             Instance = new ModService();
@@ -158,6 +160,14 @@ namespace BrokenNodeDetector {
                     Results.Add(pair.Key);
                 }
             });
+        }
+
+        public void StartKeybindEdit() {
+            KeybindEditInProgress = true;
+        }
+        
+        public void FinishKeybindEdit() {
+            KeybindEditInProgress = false;
         }
     }
 
