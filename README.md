@@ -4,7 +4,7 @@ Locates invisible problems with your transport system and helps fix them.
 
 ![Mod Panel](https://user-images.githubusercontent.com/1386719/72827820-63b60400-3c73-11ea-9f24-740eb4dd8da7.png)
 
-Press **Ctrl+Zero** in-game to display the mod panel.
+Press **Ctrl+Zero** in-game to display the mod panel_(configurable in mod options)_.
 
 ## Fix broken nodes
 
@@ -30,6 +30,11 @@ Broken transport routes can prevent vehicles from spawning or prevent cims from 
 * Click **Remove** to delete a broken line or stop
 
 ## Changelog
+
+### [0.5](https://github.com/CitiesSkylinesMods/BrokenNodeDetector/compare/0.4...0.5), 15/09/2020
+
+- configurable shortcut for opening/closing mod main menu
+- migrated patches from RedirectionFramework to CitiesHarmony API
 
 ### [0.4](https://github.com/CitiesSkylinesMods/BrokenNodeDetector/compare/0.3...0.4), 03/01/2020
 
