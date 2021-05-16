@@ -31,6 +31,15 @@ Broken transport routes can prevent vehicles from spawning or prevent cims from 
 
 ## Changelog
 
+### [0.6](https://github.com/CitiesSkylinesMods/BrokenNodeDetector/compare/0.5...0.6), 16/05/2021
+
+- switched to CitiesHarmony,
+- entity highlighter,
+- too short segment scanner,
+- disconnected building scanner,
+- draggable panel,
+- reset panel position in the mod options
+
 ### [0.5](https://github.com/CitiesSkylinesMods/BrokenNodeDetector/compare/0.4...0.5), 15/09/2020
 
 - configurable shortcut for opening/closing mod main menu
