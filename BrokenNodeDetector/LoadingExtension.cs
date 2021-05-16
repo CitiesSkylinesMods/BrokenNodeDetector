@@ -71,7 +71,7 @@ namespace BrokenNodeDetector {
         }
         
         internal static class Patcher {
-            private const string HarmonyId = "yourname.YourModName";
+            private const string HarmonyId = "krzychu124.broken-node-detector";
             private static bool patched = false;
 
             public static void PatchAll() {

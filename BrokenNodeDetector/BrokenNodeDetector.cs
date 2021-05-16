@@ -6,7 +6,7 @@ using UnityEngine;
 namespace BrokenNodeDetector
 {
     public class BrokenNodeDetector : IUserMod {
-        public static readonly string Version = "0.5";
+        public static readonly string Version = "0.6";
 
         public string Name => "Broken Node Detector " + Version;
 
@@ -15,7 +15,7 @@ namespace BrokenNodeDetector
         public void OnEnabled() {
             Debug.Log($"[BND] Broken Node Detector enabled. Version {Version}");
             HarmonyHelper.EnsureHarmonyInstalled();
-            Keybinds.Ensure();
+            ModSettings.Ensure();
 #if DEBUG
             LoadingExtension.Patcher.PatchAll();
 #endif
@@ -23,6 +23,9 @@ namespace BrokenNodeDetector
 
         public void OnDisabled() {
             Debug.Log("[BND] Broken Node Detector disabled.");
+            if (LoadingExtension.MainUi) {
+                Object.Destroy(LoadingExtension.MainUi);
+            }
 #if DEBUG
             LoadingExtension.Patcher.UnpatchAll();
 #endif

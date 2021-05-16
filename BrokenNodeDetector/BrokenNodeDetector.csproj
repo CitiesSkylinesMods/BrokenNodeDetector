@@ -35,25 +35,32 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BrokenNodeDetector.cs" />
-    <Compile Include="Keybinds.cs" />
+    <Compile Include="Highlighter\BrokenNodeHighlight.cs" />
+    <Compile Include="Highlighter\BuildingHighlight.cs" />
+    <Compile Include="Highlighter\IHighlightable.cs" />
+    <Compile Include="Highlighter\PTStopHighlight.cs" />
+    <Compile Include="Highlighter\SegmentHighlight.cs" />
+    <Compile Include="ModSettings.cs" />
     <Compile Include="LoadingExtension.cs" />
     <Compile Include="ModService.cs" />
     <Compile Include="Patch\_NetNode\UpdateLaneConnectionPatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResultHighlight.cs" />
+    <Compile Include="BndResultHighlightManager.cs" />
     <Compile Include="UI\MainPanel.cs" />
     <Compile Include="UI\MainUI.cs" />
     <Compile Include="UI\SettingsUI.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="0Harmony, Version=2.0.1.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\Lib.Harmony.2.0.1\lib\net35\0Harmony.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\Dependencies\Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="CitiesHarmony.API, Version=1.0.5.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\CitiesHarmony.API.1.0.5\lib\net35\CitiesHarmony.API.dll</HintPath>
+    <Reference Include="CitiesHarmony.API, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\CitiesHarmony.API.2.0.0\lib\net35\CitiesHarmony.API.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="CitiesHarmony.Harmony, Version=2.0.4.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\CitiesHarmony.Harmony.2.0.4\lib\net35\CitiesHarmony.Harmony.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ColossalManaged, Version=0.3.0.0, Culture=neutral, PublicKeyToken=null">

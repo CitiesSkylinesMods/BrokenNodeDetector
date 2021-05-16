@@ -20,7 +20,25 @@ namespace BrokenNodeDetector.UI {
             UIPanel panel = CreateRowPanel((UIPanel) ((UIHelper) group).self);
 
             CreateLabel(panel, "Open Mod Menu", 0.6f);
-            CreateKeybindButton(panel, Keybinds.instance.MainKey, 0.3f);
+            CreateKeybindButton(panel, ModSettings.instance.MainKey, 0.3f);
+            UIHelperBase group2 = helper.AddGroup("Other");
+            UIPanel panel2 = CreateRowPanel((UIPanel) ((UIHelper) group2).self);
+            CreateResetMenuPosition(panel2);
+            
+        }
+
+        public void CreateResetMenuPosition(UIPanel parent) {
+            var btn = parent.AddUIComponent<UIButton>();
+            btn.size = new Vector2(ROW_WIDTH * 0.3f, ROW_HEIGHT);
+            btn.text = "Reset Menu Position";
+            btn.hoveredTextColor = new Color32(128, 128, 255, 255);
+            btn.pressedTextColor = new Color32(192, 192, 255, 255);
+            btn.normalBgSprite = "ButtonMenu";
+            btn.eventClick += OnResetClicked;
+        }
+
+        private void OnResetClicked(UIComponent component, UIMouseEventParameter eventparam) {
+            ModSettings.instance.ResetMenuPosition();
         }
 
         public UIPanel CreateRowPanel(UIComponent currentGroup) {
