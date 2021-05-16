@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using ColossalFramework;
 using ColossalFramework.UI;
 using UnityEngine;
@@ -11,10 +12,12 @@ namespace BrokenNodeDetector.UI {
         private UIPanel _mainPanel;
         private UILabel _title;
         private UILabel _brokenNodesLabel;
+        private UIDragHandle _dragHandle;
         private UIButton _closeButton;
         private UIButton _startButton;
         private UIButton _moveNextButton;
         private UIButton _searchGhostNodesButton;
+        private UIButton _searchShortSegmentsButton;
 
         //todo move to separate panel class..
         private UIButton _searchDisconnectedPtStopsButton;
@@ -22,22 +25,41 @@ namespace BrokenNodeDetector.UI {
         private UIButton _moveNextTransportLineButton;
         private UIButton _removePtStopButton;
         private UIButton _removePtLaneButton;
+        private UIButton _searchDisconnectedBuildingsButton;
+        private UIButton _moveNextBuildingButton;
 
         private UIPanel _linePanel;
         private UILabel _lineId;
         private UILabel _lineName;
         private UIColorField _lineColor;
         private UILabel _brokenStopsNumber;
+
+
+        private UIButton _moveNextSegButton;
+        private UIPanel _segmentPanel;
+        private UILabel _segmentId;
+        private UILabel _segmentType;
+        private UILabel _segmentLength;
+
+        private UIPanel _buildingPanel;
+        private UILabel _buildingId;
         
         private UIProgressBar _progressBar;
 
         private List<ushort> _invalidNodes;
         private List<ushort>.Enumerator _invalidNodesEnumerator;
         private readonly List<ushort> _markedForRemoval = new List<ushort>();
+        private readonly HashSet<uint> _segmentsVisited = new HashSet<uint>();
+        private readonly HashSet<uint> _buildingsVisited = new HashSet<uint>();
 
         private ushort _currentLine;
         private ushort _currentStop;
+
+        private uint _currentSegment;
+        private uint _currentBuilding;
         //todo ----------------------------------
+        private Coroutine _runningScan;
+        private Coroutine _runningProgress;
 
         public void Initialize() {
             if (_mainPanel != null) {
@@ -48,30 +70,37 @@ namespace BrokenNodeDetector.UI {
             _mainPanel = AddUIComponent<UIPanel>();
             _mainPanel.backgroundSprite = "UnlockingPanel2";
             _mainPanel.color = new Color32(75, 75, 135, 255);
-            width = 400;
+            width = 410;
             height = 130;
-            _mainPanel.width = 400;
-            _mainPanel.height = 130;
+            _mainPanel.width = 410;
+            _mainPanel.height = 170;
 
-            relativePosition = new Vector3(250, 20);
+            relativePosition = new Vector3(ModSettings.instance.MenuPosX, ModSettings.instance.MenuPosY);
             _mainPanel.relativePosition = Vector3.zero;
 
-            _title = _mainPanel.AddUIComponent<UILabel>();
+            _title = AddUIComponent<UILabel>();
             _title.autoSize = true;
             _title.padding = new RectOffset(10, 10, 5, 15);
             _title.relativePosition = new Vector2(100, 12);
             _title.text = "Broken node detector";
 
+            _dragHandle = AddUIComponent<UIDragHandle>();
+            _dragHandle.area = new Vector4(0,0,380, 45);
+            // _dragHandle.width = 380;
+            // _dragHandle.height = 45;
+
             _closeButton = _mainPanel.AddUIComponent<UIButton>();
             _closeButton.eventClick += CloseButtonClick;
-            _closeButton.relativePosition = new Vector3(width - _closeButton.width - 45, 5f);
+            _closeButton.relativePosition = new Vector3(width - _closeButton.width - 35, 5f);
             _closeButton.normalBgSprite = "buttonclose";
             _closeButton.hoveredBgSprite = "buttonclosehover";
             _closeButton.pressedBgSprite = "buttonclosepressed";
-            
-            _startButton = CreateButton(_mainPanel, "Run detector", new Rect(new Vector2(10, 50f), new Vector2(180, 32)), StartButtonClick);
-            _searchGhostNodesButton = CreateButton(_mainPanel, "Remove ghost nodes", new Rect(new Vector2(210, 50f), new Vector2(180, 32)), GhostNodesButtonClick);
-            _searchDisconnectedPtStopsButton = CreateButton(_mainPanel, "Detect disconnected PT stops", new Rect(new Vector2(10, 90f), new Vector2(380, 32)), PTLineDetectorClick);
+
+            _startButton = CreateButton(_mainPanel, "Broken nodes", new Rect(new Vector2(10, 50f), new Vector2(180, 32)), StartButtonClick);
+            _searchGhostNodesButton = CreateButton(_mainPanel, "Ghost nodes", new Rect(new Vector2(200, 50f), new Vector2(200, 32)), GhostNodesButtonClick);
+            _searchShortSegmentsButton = CreateButton(_mainPanel, "Short segments", new Rect(new Vector2(10, 90f), new Vector2(180, 32)), ShortSegmentsButtonClick);
+            _searchDisconnectedPtStopsButton = CreateButton(_mainPanel, "Disconnected PT stops", new Rect(new Vector2(200, 90f), new Vector2(200, 32)), PTLineDetectorClick);
+            _searchDisconnectedBuildingsButton = CreateButton(_mainPanel, "Disconnected buildings (experimental)", new Rect(new Vector2(10, 130f), new Vector2(390, 32)), StartScanBuildingsClick);
 
             _progressBar = _mainPanel.AddUIComponent<UIProgressBar>();
             _progressBar.relativePosition = new Vector3(50, 75);
@@ -84,27 +113,33 @@ namespace BrokenNodeDetector.UI {
             _brokenNodesLabel = _mainPanel.AddUIComponent<UILabel>();
             _brokenNodesLabel.autoSize = true;
             _brokenNodesLabel.padding = new RectOffset(10, 10, 15, 15);
-            _brokenNodesLabel.relativePosition = new Vector2(95, 120);
+            _brokenNodesLabel.relativePosition = new Vector2(95, 152);
 
-            _moveNextButton = CreateButton(_mainPanel, "Move to next broken node", new Rect(new Vector2(75, 240f), new Vector2(250, 48)), MoveNextBrokeNodeButtonClick);
+            _moveNextButton = CreateButton(_mainPanel, "Move to next broken node", new Rect(new Vector2(75, 260f), new Vector2(260, 32)), MoveNextBrokeNodeButtonClick);
             _moveNextButton.Hide();
+
+            _moveNextSegButton = CreateButton(_mainPanel, "Move to next segment", new Rect(new Vector2(75, 280f), new Vector2(250, 32)), MoveNextSegmentButtonClick);
+            _moveNextSegButton.Hide();
             
-            _moveNextTransportLineButton = CreateButton(_mainPanel, "Find next broken PT Line", new Rect(new Vector2(10, 160f), new Vector2(235, 32)), MoveNextPtLineButtonClick);
+            _moveNextBuildingButton = CreateButton(_mainPanel, "Move to next building", new Rect(new Vector2(75, 230f), new Vector2(250, 48)), MoveNextBuildingButtonClick);
+            _moveNextBuildingButton.Hide();
+
+            _moveNextTransportLineButton = CreateButton(_mainPanel, "Find next broken PT Line", new Rect(new Vector2(10, 200f), new Vector2(235, 32)), MoveNextPtLineButtonClick);
             _moveNextTransportLineButton.Hide();
 
-            _removePtLaneButton = CreateButton(_mainPanel, "Remove Line", new Rect(new Vector2(255, 160f), new Vector2(135, 32)), RemovePtLineClick);
+            _removePtLaneButton = CreateButton(_mainPanel, "Remove Line", new Rect(new Vector2(255, 200f), new Vector2(135, 32)), RemovePtLineClick);
             _removePtLaneButton.Hide();
 
-            _moveNextPtButton = CreateButton(_mainPanel, "Find next disconnected stop", new Rect(new Vector2(10, 280f), new Vector2(235, 32)), MoveNextPtStopClick);
+            _moveNextPtButton = CreateButton(_mainPanel, "Find next disconnected stop", new Rect(new Vector2(10, 310f), new Vector2(235, 32)), MoveNextPtStopClick);
             _moveNextPtButton.Hide();
 
-            _removePtStopButton = CreateButton(_mainPanel, "Remove", new Rect(new Vector2(255, 280f), new Vector2(135, 32)), RemovePtStopClick);
+            _removePtStopButton = CreateButton(_mainPanel, "Remove", new Rect(new Vector2(255, 310f), new Vector2(135, 32)), RemovePtStopClick);
             _removePtStopButton.Hide();
 
             _linePanel = _mainPanel.AddUIComponent<UIPanel>();
             _linePanel.width = 390;
             _linePanel.height = 80;
-            _linePanel.relativePosition = new Vector2(10, 195);
+            _linePanel.relativePosition = new Vector2(10, 235);
 
             _lineId = _linePanel.AddUIComponent<UILabel>();
             _lineId.prefix = "Line ID: ";
@@ -126,7 +161,53 @@ namespace BrokenNodeDetector.UI {
             _brokenStopsNumber.relativePosition = new Vector2(10, 58);
 
             _linePanel.Hide();
-            absolutePosition = new Vector3(250, 30);
+            
+            _segmentPanel = _mainPanel.AddUIComponent<UIPanel>();
+            _segmentPanel.width = 390;
+            _segmentPanel.height = 80;
+            _segmentPanel.relativePosition = new Vector2(10, 195);
+
+            _segmentId = _segmentPanel.AddUIComponent<UILabel>();
+            _segmentId.prefix = "Segment ID: ";
+            _segmentId.relativePosition = new Vector2(10, 5);
+
+            _segmentType = _segmentPanel.AddUIComponent<UILabel>();
+            _segmentType.prefix = "Segment type: ";
+            _segmentType.relativePosition = new Vector2(10, 30);
+
+            _segmentLength = _segmentPanel.AddUIComponent<UILabel>();
+            _segmentLength.prefix = "Length: N/A";
+            _segmentLength.relativePosition = new Vector2(10, 58);
+
+            _segmentPanel.Hide();
+
+            _buildingPanel = _mainPanel.AddUIComponent<UIPanel>();
+            _buildingPanel.width = 390;
+            _buildingPanel.height = 40;
+            _buildingPanel.relativePosition = new Vector2(10, 195);
+            
+            _buildingId = _buildingPanel.AddUIComponent<UILabel>();
+            _buildingId.prefix = "Building ID: ";
+            _buildingId.relativePosition = new Vector2(10, 5);
+            
+            _buildingPanel.Hide();
+
+            absolutePosition = new Vector3(ModSettings.instance.MenuPosX, ModSettings.instance.MenuPosY);
+        }
+
+        protected override void OnPositionChanged() {
+            base.OnPositionChanged();
+            
+            bool posChanged = ModSettings.instance.MenuPosX != (int)absolutePosition.x
+                              || ModSettings.instance.MenuPosY != (int)absolutePosition.y;
+            if (posChanged) {
+                ModSettings.instance.MenuPosX.value = (int) absolutePosition.x;
+                ModSettings.instance.MenuPosY.value = (int) absolutePosition.y;
+            }
+        }
+
+        internal void ForceUpdateMenuPosition() {
+            absolutePosition = new Vector3(ModSettings.instance.MenuPosX, ModSettings.instance.MenuPosY);
         }
 
         private void CloseButtonClick(UIComponent component, UIMouseEventParameter eventparam) {
@@ -139,7 +220,7 @@ namespace BrokenNodeDetector.UI {
             OnBeforeStart();
 
             ModService.Instance.StartDetector();
-            StartCoroutine(Countdown(5, () => {
+            _runningScan = StartCoroutine(Countdown(5, () => {
                 ModService.Instance.StopDetector();
                 OnAfterStop();
                 ShowResults();
@@ -150,11 +231,35 @@ namespace BrokenNodeDetector.UI {
             eventparam.Use();
             OnBeforeStart();
 
-            StartCoroutine(ModService.Instance.SearchForGhostNodes());
+            _runningScan = StartCoroutine(ModService.Instance.SearchForGhostNodes());
 
-            StartCoroutine(Countdown(5, () => {
+            _runningProgress = StartCoroutine(Countdown(5, () => {
                 ShowGhostNodesResult();
                 OnAfterStop();
+            }));
+        }
+
+        private void ShortSegmentsButtonClick(UIComponent component, UIMouseEventParameter eventparam) {
+            eventparam.Use();
+            OnBeforeStart();
+
+            _runningScan = StartCoroutine(ModService.Instance.SearchForShortSegments());
+
+            _runningProgress = StartCoroutine(UpdateProgress(() => {
+                OnAfterStop();
+                ShowShortSegmentsResult();
+            }));
+        } 
+        
+        private void StartScanBuildingsClick(UIComponent component, UIMouseEventParameter eventparam) {
+            eventparam.Use();
+            OnBeforeStart();
+
+            _runningScan = StartCoroutine(ModService.Instance.ScanForDisconnectedBuildings());
+
+            _runningProgress = StartCoroutine(UpdateProgress(() => {
+                OnAfterStop();
+                ShowBuildingResult();
             }));
         }
 
@@ -162,8 +267,8 @@ namespace BrokenNodeDetector.UI {
             eventparam.Use();
             OnBeforeStart();
 
-            StartCoroutine(ModService.Instance.SearchForDisconnectedPtStops());
-            StartCoroutine(UpdateProgress(() => {
+            _runningScan = StartCoroutine(ModService.Instance.SearchForDisconnectedPtStops());
+            _runningProgress = StartCoroutine(UpdateProgress(() => {
                 OnAfterStop();
                 ShowPtResults();
             }));
@@ -185,6 +290,7 @@ namespace BrokenNodeDetector.UI {
                 bool unlimitedCamera = ToolsModifierControl.cameraController.m_unlimitedCamera;
                 ToolsModifierControl.cameraController.m_unlimitedCamera = true;
                 ToolsModifierControl.cameraController.SetTarget(instanceId, ToolsModifierControl.cameraController.transform.position, true);
+                BndResultHighlightManager.instance.Highlight(new HighlightData{NodeID = nextNodeId, Type = HighlightType.Node});
                 ToolsModifierControl.cameraController.m_unlimitedCamera = unlimitedCamera;
             } else {
                 _markedForRemoval.Add(nextNodeId);
@@ -249,6 +355,72 @@ namespace BrokenNodeDetector.UI {
             bool unlimitedCamera = ToolsModifierControl.cameraController.m_unlimitedCamera;
             ToolsModifierControl.cameraController.m_unlimitedCamera = true;
             ToolsModifierControl.cameraController.SetTarget(instanceId, ToolsModifierControl.cameraController.transform.position, true);
+            BndResultHighlightManager.instance.Highlight(new HighlightData{NodeID = _currentStop, Type = HighlightType.PTStop});
+            ToolsModifierControl.cameraController.m_unlimitedCamera = unlimitedCamera;
+        }
+
+        private void MoveNextSegmentButtonClick(UIComponent component, UIMouseEventParameter eventparam) {
+            if (ModService.Instance.ShortSegments.Count == 0) {
+                UpdateSegmentsPanel();
+            }
+
+            List<uint> keys = ModService.Instance.ShortSegments.Keys.ToList();
+            if (keys.Count > 0) {
+                _currentSegment = keys.Find(s => !_segmentsVisited.Contains(s));
+                if (_currentSegment == 0) {
+                    _currentSegment = keys[0];
+                    _segmentsVisited.Clear();
+                }
+            } else {
+                _currentSegment = 0;
+                _segmentsVisited.Clear();
+            }
+
+            UpdateSegmentsButtons();
+            UpdateSegmentsPanel();
+
+            if (_currentSegment == 0) return;
+            Debug.Log("[BND] Moving to next too short segment (" + _currentSegment + ")");
+            InstanceID instanceId = default;
+            instanceId.NetSegment = (ushort) _currentSegment;
+            _segmentsVisited.Add(_currentSegment);
+
+            bool unlimitedCamera = ToolsModifierControl.cameraController.m_unlimitedCamera;
+            ToolsModifierControl.cameraController.m_unlimitedCamera = true;
+            ToolsModifierControl.cameraController.SetTarget(instanceId, ToolsModifierControl.cameraController.transform.position, true);
+            BndResultHighlightManager.instance.Highlight(new HighlightData{SegmentID = _currentSegment, Type = HighlightType.Segment});
+            ToolsModifierControl.cameraController.m_unlimitedCamera = unlimitedCamera;
+        } 
+        private void MoveNextBuildingButtonClick(UIComponent component, UIMouseEventParameter eventparam) {
+            if (ModService.Instance.DisconnectedBuildings.Count == 0) {
+                UpdateBuildingsPanel();
+            }
+
+            List<uint> keys = ModService.Instance.DisconnectedBuildings.Keys.ToList();
+            if (keys.Count > 0) {
+                _currentBuilding = keys.Find(s => !_buildingsVisited.Contains(s));
+                if (_currentBuilding == 0) {
+                    _currentBuilding = keys[0];
+                    _buildingsVisited.Clear();
+                }
+            } else {
+                _currentBuilding = 0;
+                _buildingsVisited.Clear();
+            }
+
+            UpdateBuildingButtons();
+            UpdateBuildingsPanel();
+
+            if (_currentBuilding == 0) return;
+            Debug.Log("[BND] Moving to next disconnected building (" + _currentSegment + ")");
+            InstanceID instanceId = default;
+            instanceId.Building = (ushort) _currentBuilding;
+            _buildingsVisited.Add(_currentBuilding);
+
+            bool unlimitedCamera = ToolsModifierControl.cameraController.m_unlimitedCamera;
+            ToolsModifierControl.cameraController.m_unlimitedCamera = true;
+            ToolsModifierControl.cameraController.SetTarget(instanceId, ToolsModifierControl.cameraController.transform.position, true);
+            BndResultHighlightManager.instance.Highlight(new HighlightData{BuildingID = _currentBuilding, Type = HighlightType.Building});
             ToolsModifierControl.cameraController.m_unlimitedCamera = unlimitedCamera;
         }
 
@@ -256,8 +428,8 @@ namespace BrokenNodeDetector.UI {
             if (_currentLine == 0) {
                 return;
             }
-            
-            Debug.Log("[BND] Removing line ["+ _currentLine + "]("+ModService.Instance.InvalidLines[_currentLine].Name+") Line has " + ModService.Instance.InvalidLines[_currentLine].AllStops + " stops with "+ModService.Instance.InvalidLines[_currentLine].Stops.Count+" invalid");
+
+            Debug.Log("[BND] Removing line [" + _currentLine + "](" + ModService.Instance.InvalidLines[_currentLine].Name + ") Line has " + ModService.Instance.InvalidLines[_currentLine].AllStops + " stops with " + ModService.Instance.InvalidLines[_currentLine].Stops.Count + " invalid");
             ShowConfirmDialog(
                 "[BND] Remove Public Transport Line",
                 $"Are you sure you want to remove line: {ModService.Instance.InvalidLines[_currentLine].Name}?",
@@ -352,13 +524,16 @@ namespace BrokenNodeDetector.UI {
 
         private void OnBeforeStart() {
             _markedForRemoval.Clear();
-            _brokenNodesLabel.relativePosition = new Vector2(95, 120);
+            _brokenNodesLabel.relativePosition = new Vector2(95, 152);
             _brokenNodesLabel.Hide();
+            _segmentsVisited.Clear();
 
             _mainPanel.height = 130;
             _startButton.Hide();
             _searchGhostNodesButton.Hide();
             _searchDisconnectedPtStopsButton.Hide();
+            _searchDisconnectedBuildingsButton.Hide();
+            _searchShortSegmentsButton.Hide();
 
             _progressBar.value = 0;
             _progressBar.Show();
@@ -368,9 +543,27 @@ namespace BrokenNodeDetector.UI {
             _removePtLaneButton.Hide();
             _moveNextPtButton.Hide();
             _removePtStopButton.Hide();
+            _moveNextBuildingButton.Hide();
             _linePanel.Hide();
+
+            _segmentPanel.Hide();
+            _moveNextSegButton.Hide();
+            _buildingPanel.Hide();
+            _currentSegment = 0;
             _currentStop = 0;
             _currentLine = 0;
+            _currentBuilding = 0;
+            
+            if (_runningScan != null) {
+                StopCoroutine(_runningScan);
+                _runningScan = null;
+            }
+            if (_runningProgress != null) {
+                StopCoroutine(_runningProgress);
+                _runningProgress = null;
+            }
+
+            BndResultHighlightManager.instance.enabled = false;
         }
 
         private void OnAfterStop() {
@@ -378,13 +571,15 @@ namespace BrokenNodeDetector.UI {
             _searchGhostNodesButton.Show();
             _brokenNodesLabel.Show();
             _searchDisconnectedPtStopsButton.Show();
+            _searchShortSegmentsButton.Show();
+            _searchDisconnectedBuildingsButton.Show();
 
             _progressBar.Hide();
         }
 
         private void OnClose(bool resetOnly = false) {
-            _mainPanel.height = 130;
-            _brokenNodesLabel.relativePosition = new Vector2(95, 120);
+            _mainPanel.height = 170;
+            _brokenNodesLabel.relativePosition = new Vector2(95, 152);
             _brokenNodesLabel.text = "";
             _brokenNodesLabel.Hide();
             _moveNextButton.Hide();
@@ -392,12 +587,24 @@ namespace BrokenNodeDetector.UI {
             _removePtLaneButton.Hide();
             _moveNextPtButton.Hide();
             _removePtStopButton.Hide();
+            _moveNextBuildingButton.Hide();
             _linePanel.Hide();
+            _buildingPanel.Hide();
             _currentStop = 0;
             _currentLine = 0;
             if (!resetOnly) {
                 Hide();
             }
+            if (_runningScan != null) {
+                StopCoroutine(_runningScan);
+                _runningScan = null;
+            }
+            if (_runningProgress != null) {
+                StopCoroutine(_runningProgress);
+                _runningProgress = null;
+            }
+
+            BndResultHighlightManager.instance.enabled = false;
         }
 
         IEnumerator Countdown(int seconds, Action action) {
@@ -434,12 +641,12 @@ namespace BrokenNodeDetector.UI {
         }
 
         private void ShowGhostNodesResult() {
-            _mainPanel.height = 160;
+            _mainPanel.height = 200;
             if (ModService.Instance.LastGhostNodesCount == 0) {
                 _brokenNodesLabel.text = "Great! No ghost nodes found :-)";
-                _brokenNodesLabel.relativePosition = new Vector3(55, 115);
+                _brokenNodesLabel.relativePosition = new Vector3(55, 152);
             } else {
-                _brokenNodesLabel.relativePosition = new Vector3(25, 115);
+                _brokenNodesLabel.relativePosition = new Vector3(25, 152);
                 _brokenNodesLabel.text = "Found and released " + ModService.Instance.LastGhostNodesCount + " ghost nodes :-)";
             }
         }
@@ -447,10 +654,10 @@ namespace BrokenNodeDetector.UI {
         private void ShowResults() {
             if (ModService.Instance.Results.Count == 0) {
                 _brokenNodesLabel.text = "Great! Nothing found :-)";
-                _mainPanel.height = 160;
+                _mainPanel.height = 200;
                 Debug.Log("[BND] Nothing found :-)");
             } else {
-                _brokenNodesLabel.relativePosition = new Vector2(10, 120);
+                _brokenNodesLabel.relativePosition = new Vector2(10, 152);
                 _brokenNodesLabel.text = $"Found {ModService.Instance.Results.Count} possibly broken nodes\n" +
                                          "1. Click on 'Move next' to show node location\n" +
                                          "2. Move node or rebuild path segment\n" +
@@ -467,15 +674,46 @@ namespace BrokenNodeDetector.UI {
         private void ShowPtResults() {
             if (ModService.Instance.InvalidLines.Count == 0) {
                 _brokenNodesLabel.text = "Great! Nothing found :-)";
-                _mainPanel.height = 160;
+                _mainPanel.height = 200;
                 Debug.Log("[BND] No invalid PT lines found :-)");
             } else {
-                _brokenNodesLabel.relativePosition = new Vector2(10, 120);
+                _brokenNodesLabel.relativePosition = new Vector2(10, 152);
                 _brokenNodesLabel.text = $"Found {ModService.Instance.InvalidLines.Count} possibly broken PT line(s)\n";
 
                 UpdateLinePanel();
                 UpdatePtButtons();
+                _mainPanel.height = 360;
+            }
+        }
+
+        private void ShowShortSegmentsResult() {
+            if (ModService.Instance.ShortSegments.Count == 0) {
+                _brokenNodesLabel.text = "Great! Nothing found :-)";
+                _mainPanel.height = 200;
+                Debug.Log("[BND] Too short segments not detected :-)");
+            } else {
+                _brokenNodesLabel.relativePosition = new Vector2(10, 152);
+                _brokenNodesLabel.text = $"Found {ModService.Instance.ShortSegments.Count} possibly too short segment(s)\n";
+
+                UpdateSegmentsPanel();
+                UpdateSegmentsButtons();
                 _mainPanel.height = 330;
+            }
+        }
+        
+        
+        private void ShowBuildingResult() {
+            if (ModService.Instance.DisconnectedBuildings.Count == 0) {
+                _brokenNodesLabel.text = "Great! Nothing found :-)";
+                _mainPanel.height = 200;
+                Debug.Log("[BND] Disconnected buildings not detected :-)");
+            } else {
+                _brokenNodesLabel.relativePosition = new Vector2(10, 152);
+                _brokenNodesLabel.text = $"Found {ModService.Instance.ShortSegments.Count} disconnected building(s)\n";
+
+                UpdateBuildingsPanel();
+                UpdateBuildingButtons();
+                _mainPanel.height = 290;
             }
         }
 
@@ -503,12 +741,27 @@ namespace BrokenNodeDetector.UI {
             }
         }
 
+        private void UpdateSegmentsButtons() {
+            if (ModService.Instance.ShortSegments.Count > 0) {
+                _moveNextSegButton.Show();
+            } else {
+                _moveNextSegButton.Hide();
+            }
+        }
+        private void UpdateBuildingButtons() {
+            if (ModService.Instance.DisconnectedBuildings.Count > 0) {
+                _moveNextBuildingButton.Show();
+            } else {
+                _moveNextBuildingButton.Hide();
+            }
+        }
+
         private void UpdateLinePanel() {
             if (ModService.Instance.InvalidLines.Count == 0) {
                 OnClose(true); //reset everything
                 _brokenNodesLabel.Show();
                 _brokenNodesLabel.text = "Great! Nothing found :-)";
-                _mainPanel.height = 160;
+                _mainPanel.height = 200;
                 return;
             }
 
@@ -533,7 +786,58 @@ namespace BrokenNodeDetector.UI {
             _brokenNodesLabel.text = $"Found {ModService.Instance.InvalidLines.Count} possibly broken PT line(s)\n";
         }
 
+        private void UpdateSegmentsPanel() {
+            if (ModService.Instance.ShortSegments.Count == 0) {
+                OnClose(true); //reset everything
+                _brokenNodesLabel.Show();
+                _brokenNodesLabel.text = "Great! Nothing found :-)";
+                _mainPanel.height = 200;
+                return;
+            }
+
+            _segmentPanel.Show();
+
+            if (_currentSegment != 0 && ModService.Instance.ShortSegments.TryGetValue(_currentSegment, out SegmentInfo info)) {
+                _segmentId.text = info.Id.ToString();
+                _segmentId.suffix = " Pos: " + info.Position;
+                _segmentType.text = info.Name;
+                _segmentLength.prefix = "Length: ";
+                _segmentLength.text = info.Length.ToString();
+            } else {
+                _segmentId.text = " ";
+                _segmentId.suffix = " ";
+                _segmentType.text = " ";
+                _segmentLength.prefix = "Length: ";
+                _segmentLength.text = " ";
+            }
+
+            _brokenNodesLabel.text = $"Found {ModService.Instance.ShortSegments.Count} possibly too short segments(s)\n";
+        }
+        
+        private void UpdateBuildingsPanel() {
+            if (ModService.Instance.DisconnectedBuildings.Count == 0) {
+                OnClose(true); //reset everything
+                _brokenNodesLabel.Show();
+                _brokenNodesLabel.text = "Great! Nothing found :-)";
+                _mainPanel.height = 200;
+                return;
+            }
+
+            _buildingPanel.Show();
+
+            if (_currentBuilding != 0 && ModService.Instance.DisconnectedBuildings.TryGetValue(_currentBuilding, out Vector3 position)) {
+                _buildingId.text = _currentBuilding.ToString();
+                _buildingId.suffix = " Pos: " + position;
+            } else {
+                _buildingId.text = " ";
+                _buildingId.suffix = " ";
+            }
+
+            _brokenNodesLabel.text = $"Found {ModService.Instance.DisconnectedBuildings.Count} possibly disconnected building(s)\n";
+        }
+
         private new void OnDestroy() {
+            OnClose();
             _closeButton.eventClick -= CloseButtonClick;
             _startButton.eventClick -= StartButtonClick;
             _moveNextButton.eventClick -= MoveNextBrokeNodeButtonClick;
@@ -543,6 +847,8 @@ namespace BrokenNodeDetector.UI {
             _moveNextTransportLineButton.eventClick -= MoveNextPtLineButtonClick;
             _removePtStopButton.eventClick -= RemovePtStopClick;
             _removePtLaneButton.eventClick -= RemovePtLineClick;
+            _moveNextBuildingButton.eventClick -= MoveNextBuildingButtonClick;
+            _searchDisconnectedBuildingsButton.eventClick -= StartScanBuildingsClick;
             base.OnDestroy();
             if (_mainPanel != null) {
                 Destroy(_mainPanel);
