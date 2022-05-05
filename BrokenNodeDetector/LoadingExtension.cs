@@ -14,6 +14,34 @@ namespace BrokenNodeDetector {
         public bool DetourInited { get; private set; }
         public static MainUI MainUi { get; private set; }
 
+        private bool _created;
+
+        public override void OnCreated(ILoading loading) {
+            base.OnCreated(loading);
+            if (LoadingManager.instance.m_loadingComplete &&
+                loading.currentMode == AppMode.Game &&
+                !_created) {
+                InitDetours();
+
+                if (!MainUi) {
+                    MainUi = (MainUI)UIView.GetAView().AddUIComponent(typeof(MainUI));
+                }
+            }
+
+            _created = true;
+        }
+
+        public override void OnReleased() {
+            base.OnReleased();
+            RevertDetours();
+            if (MainUi) {
+                Object.Destroy(MainUi);
+                MainUi = null;
+            }
+
+            _created = false;
+        }
+
         public override void OnLevelLoaded(LoadMode mode) {
             base.OnLevelLoaded(mode);
 
@@ -24,7 +52,7 @@ namespace BrokenNodeDetector {
             }
 
             if (!MainUi) {
-                MainUi = (MainUI) UIView.GetAView().AddUIComponent(typeof(MainUI));
+                MainUi = (MainUI)UIView.GetAView().AddUIComponent(typeof(MainUI));
             }
         }
 
@@ -69,7 +97,7 @@ namespace BrokenNodeDetector {
             Patcher.UnpatchAll();
             DetourInited = false;
         }
-        
+
         internal static class Patcher {
             private const string HarmonyId = "krzychu124.broken-node-detector";
             private static bool patched = false;
@@ -80,7 +108,7 @@ namespace BrokenNodeDetector {
                 patched = true;
                 var harmony = new Harmony(HarmonyId);
                 harmony.Patch(typeof(NetNode).GetMethod(nameof(NetNode.UpdateLaneConnection)),
-                              postfix: new HarmonyMethod(typeof(CustomNetNode), nameof(CustomNetNode.Postfix)));
+                    postfix: new HarmonyMethod(typeof(CustomNetNode), nameof(CustomNetNode.Postfix)));
             }
 
             public static void UnpatchAll() {
@@ -91,6 +119,5 @@ namespace BrokenNodeDetector {
                 patched = false;
             }
         }
-
     }
 }

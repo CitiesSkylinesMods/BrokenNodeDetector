@@ -1,4 +1,3 @@
-using System;
 using System.Reflection;
 using ColossalFramework;
 using ColossalFramework.UI;
@@ -20,14 +19,20 @@ namespace BrokenNodeDetector.UI {
             MainPanel = (MainPanel) uiView.AddUIComponent(typeof(MainPanel));
             MainPanel.Initialize();
             MainKey = ModSettings.instance.MainKey;
+            #if !DEBUG
             BndResultHighlightManager.Ensure();
             _highlightManager = BndResultHighlightManager.instance;
             RenderManager.RegisterRenderableManager(_highlightManager);
+            #endif
         }
 
         public override void Update() {
             if (!MainKey.IsPressed() || ModService.Instance.KeybindEditInProgress || Time.time - _lastKeybindHitTime < _hitInterval) return;
             
+            // if (!MainPanel.isVisible)
+            //     MainPanel.Show();
+            // else
+            //     MainPanel.Hide();
             if (!MainPanel.isVisible)
                 MainPanel.Show();
             else
@@ -37,9 +42,11 @@ namespace BrokenNodeDetector.UI {
 
         public override void OnDestroy() {
             base.OnDestroy();
+#if !DEBUG
             RemoveFromRenderables();
+#endif
             if (MainPanel != null) {
-                Destroy(MainPanel);
+                Destroy(MainPanel.gameObject);
                 MainPanel = null;
                 MainKey = null;
             }
@@ -51,6 +58,8 @@ namespace BrokenNodeDetector.UI {
             FastList<IRenderableManager> value = (FastList<IRenderableManager>)fieldInfo.GetValue(null);
             value.Remove(_highlightManager);
             RenderManager.GetManagers(out IRenderableManager[] _, out int count2);
+            Destroy(_highlightManager.gameObject);
+            _highlightManager = null;
         }
     }
 }

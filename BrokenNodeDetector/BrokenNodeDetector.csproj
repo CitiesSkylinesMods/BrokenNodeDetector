@@ -47,9 +47,21 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResultHighlight.cs" />
     <Compile Include="BndResultHighlightManager.cs" />
+    <Compile Include="UI\Tools\BrokenNodesTool\BrokenNodes.cs" />
+    <Compile Include="UI\Tools\BrokenPropsTool\BrokenProps.cs" />
+    <Compile Include="UI\Tools\DetectorFactory.cs" />
+    <Compile Include="UI\Tools\DisconnectedBuildingsTool\DisconnectedBuildings.cs" />
+    <Compile Include="UI\Tools\DisconnectedPublicTransportStopsTool\DisconnectedPublicTransportStops.cs" />
+    <Compile Include="UI\Tools\GhostNodesTool\GhostNodes.cs" />
+    <Compile Include="UI\Tools\IDetector.cs" />
     <Compile Include="UI\MainPanel.cs" />
     <Compile Include="UI\MainUI.cs" />
+    <Compile Include="UI\ProgressPanel.cs" />
+    <Compile Include="UI\ResultsPanel.cs" />
     <Compile Include="UI\SettingsUI.cs" />
+    <Compile Include="UI\Tools\SegmentUpdateTool\SegmentUpdateRequest.cs" />
+    <Compile Include="UI\Tools\ShortSegmentsTool\ShortSegments.cs" />
+    <Compile Include="UI\Tools\UIHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">

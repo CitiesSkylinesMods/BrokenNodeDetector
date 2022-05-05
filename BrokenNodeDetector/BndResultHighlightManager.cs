@@ -1,12 +1,11 @@
 using System.Collections.Generic;
+using System.Reflection;
 using BrokenNodeDetector.Highlighter;
 using UnityEngine;
 
 namespace BrokenNodeDetector {
     public class BndResultHighlightManager: SimulationManagerBase<BndResultHighlightManager, ResultHighlightProperties>, IRenderableManager {
         private static bool _instantiated;
-
-        private static BndResultHighlightManager _instance;
 
         private IHighlightable _highlightable;
 
@@ -22,9 +21,11 @@ namespace BrokenNodeDetector {
         }
 
         private void OnDestroy() {
-            _instance = null;
             _instantiated = false;
+            _highlightable = null;
             _highlightables.Clear();
+            GetType().GetField("sInstance", BindingFlags.NonPublic | BindingFlags.Static)
+                ?.SetValue(null, null);
         }
 
         private void OnDisable() {

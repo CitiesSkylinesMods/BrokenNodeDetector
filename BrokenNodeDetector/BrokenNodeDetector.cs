@@ -6,16 +6,27 @@ using UnityEngine;
 namespace BrokenNodeDetector
 {
     public class BrokenNodeDetector : IUserMod {
-        public static readonly string Version = "0.6";
+        public static readonly string Version = "0.7";
 
         public string Name => "Broken Node Detector " + Version;
 
         public string Description => "Search for broken nodes when TM:PE vehicles despawn.";
+#if TEST_UI
+        private MainUI _testUI;
+#endif
 
         public void OnEnabled() {
             Debug.Log($"[BND] Broken Node Detector enabled. Version {Version}");
             HarmonyHelper.EnsureHarmonyInstalled();
             ModSettings.Ensure();
+            
+#if TEST_UI
+            if (UIView.GetAView()) {
+                TestUI();
+            } else {
+                LoadingManager.instance.m_introLoaded += TestUI;
+            }
+#endif
 #if DEBUG
             LoadingExtension.Patcher.PatchAll();
 #endif
@@ -26,7 +37,14 @@ namespace BrokenNodeDetector
             if (LoadingExtension.MainUi) {
                 Object.Destroy(LoadingExtension.MainUi);
             }
+#if TEST_UI
+            if (_testUI) {
+                Object.Destroy(_testUI.gameObject);
+                _testUI = null;
+            }
+#endif
 #if DEBUG
+            LoadingManager.instance.m_introLoaded -= TestUI;
             LoadingExtension.Patcher.UnpatchAll();
 #endif
         }
@@ -34,5 +52,11 @@ namespace BrokenNodeDetector
         public void OnSettingsUI(UIHelper helper) {
             new SettingsUI().BuildUI(helper);
         }
+        
+#if TEST_UI
+        private void TestUI() {
+            _testUI = (MainUI) UIView.GetAView().AddUIComponent(typeof(MainUI));
+        }
+#endif
     }
 }
