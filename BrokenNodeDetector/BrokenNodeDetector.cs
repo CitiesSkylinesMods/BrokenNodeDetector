@@ -1,6 +1,7 @@
 ﻿using ICities;
 using BrokenNodeDetector.UI;
 using CitiesHarmony.API;
+using ColossalFramework.UI;
 using UnityEngine;
 
 namespace BrokenNodeDetector
@@ -35,7 +36,11 @@ namespace BrokenNodeDetector
         public void OnDisabled() {
             Debug.Log("[BND] Broken Node Detector disabled.");
             if (LoadingExtension.MainUi) {
-                Object.Destroy(LoadingExtension.MainUi);
+                Object.Destroy(LoadingExtension.MainUi.gameObject);
+            }
+
+            if (ModSettings.exists) {
+                Object.Destroy(ModSettings.instance.gameObject);
             }
 #if TEST_UI
             if (_testUI) {

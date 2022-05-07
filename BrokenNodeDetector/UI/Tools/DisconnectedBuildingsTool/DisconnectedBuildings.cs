@@ -11,6 +11,7 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedBuildingsTool {
         private readonly HashSet<ushort> _buildingsVisited = new HashSet<ushort>();
         private readonly Dictionary<ushort, Vector3> _disconnectedBuildings = new Dictionary<ushort, Vector3>();
         private ushort _currentBuilding;
+        private volatile float _progress;
 
         public DisconnectedBuildings() {
             BuildTemplate();
@@ -27,13 +28,13 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedBuildingsTool {
             IsProcessing = true;
             ResetState();
 
+            _progress = 0f;
             AsyncTask<float> asyncTask = SimulationManager.instance.AddAction(ProcessInternal());
-            SetTaskProgress(asyncTask, (int)(bm.m_buildings.m_size / 32));
-            while (asyncTask.progress < 1.0f) {
-                float progress = asyncTask.progress;
-                yield return progress < 0 ? 0 : progress;
+            while (!asyncTask.completed) {
+                yield return _progress;
             }
 
+            yield return 1.0f;
             IsProcessing = true;
         }
 
@@ -117,13 +118,14 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedBuildingsTool {
                 if (i % 32 == 0) {
                     ProgressMessage = $"Processing...{searchProgress * 100:F0}%";
                     Thread.Sleep(1);
-                    yield return searchProgress;
+                    _progress = searchProgress;
                 }
             }
             ProgressMessage = $"Processing...100%";
 
             Debug.Log("[BND] Disconnected building instances count: " + counter);
             Debug.Log("[BND] Scan report\n" + sb + "\n\n=======================================================");
+            yield return 1.0f;
         }
 
         private void BuildTemplate() {

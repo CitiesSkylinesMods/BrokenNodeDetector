@@ -11,6 +11,8 @@ namespace BrokenNodeDetector {
         public uint SegmentID;
         public uint NodeID;
         public HighlightType Type;
+        public bool AnimatedColor;
+        public Color CurrentColor;
 
         public void Reset(HighlightType type) {
             BuildingID = 0;

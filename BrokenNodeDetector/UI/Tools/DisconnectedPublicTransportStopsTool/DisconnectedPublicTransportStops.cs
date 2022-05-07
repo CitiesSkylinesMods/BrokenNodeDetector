@@ -23,6 +23,7 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedPublicTransportStopsTool {
         private readonly Dictionary<ushort, LineInfo> InvalidLines = new Dictionary<ushort, LineInfo>();
         private ushort _currentLine;
         private ushort _currentStop;
+        private volatile float _progress;
 
         public override string Name => "Find disconnected PT Stops";
 
@@ -38,13 +39,13 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedPublicTransportStopsTool {
             IsProcessing = true;
             ResetState();
 
+            _progress = 0;
             AsyncTask<float> asyncTask = SimulationManager.instance.AddAction(ProcessInternal());
-            SetTaskProgress(asyncTask, (int)(TransportManager.instance.m_lines.m_size / 2f));
-            while (asyncTask.progress < 1.0f) {
-                float progress = asyncTask.progress;
-                yield return progress < 0 ? 0 : progress;
+            while (!asyncTask.completed) {
+                yield return _progress;
             }
 
+            yield return 1.0f;
             IsProcessing = true;
         }
 
@@ -78,12 +79,13 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedPublicTransportStopsTool {
                 if (i % 2 == 0) {
                     ProgressMessage = $"Processing...{searchProgress * 100:F0}%";
                     Thread.Sleep(4);
-                    yield return searchProgress;
+                    _progress = searchProgress;
                 }
             }
 
             Debug.Log("[BND] Invalid lanes number: " + InvalidLines.Keys.Count);
             Debug.Log("[BND] Search report\n" + sb + "\n\n=======================================================");
+            yield return 1.0f;
         }
 
         private static void AppendLineInfo(StringBuilder sb, ushort lineNumber) {
@@ -158,7 +160,7 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedPublicTransportStopsTool {
         }
 
         private void BuildTemplate() {
-            _template = new GameObject("DisconnectedBuildingTemplate").AddComponent<UIPanel>();
+            _template = new GameObject("DisconnectedPTStopTemplate").AddComponent<UIPanel>();
             _template.width = 400;
             _template.height = 50;
             UILabel label = _template.AddUIComponent<UILabel>();
@@ -415,7 +417,7 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedPublicTransportStopsTool {
                         Debug.Log($"[BND] Removing stop [{_currentStop}] line: {_currentLine} index: {stopIndex} Line has {stops} stops");
 
                         //async task on simulation thread 
-                        AsyncTask a = SimulationManager.instance.AddAction("Remove PT stop", RemoveStop(_currentLine, stopIndex, () => {
+                        SimulationManager.instance.AddAction("Remove PT stop", RemoveStop(_currentLine, stopIndex, () => {
                             _currentStop = 0;
                             if (stops == 1) {
                                 InvalidLines.Remove(_currentLine);

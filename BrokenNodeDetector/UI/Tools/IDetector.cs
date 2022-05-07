@@ -9,25 +9,36 @@ namespace BrokenNodeDetector.UI.Tools {
     public abstract class Detector : IDetector, IDisposable {
         protected static UIComponent _defaultTemplate;
         protected UIComponent _template;
-        
-        public event Action OnFinished;
+        protected UIComponent _templatePrepare;
+
         public abstract string Name { get; }
         public abstract string Tooltip { get; }
+
+        public virtual bool UsePrepareStep { get; protected set; }
+        public virtual IEnumerable<bool> Prepare() {
+            yield return true;
+        }
+        
         public abstract IEnumerable<float> Process();
         public bool IsProcessing { get; protected set; }
         public bool ShowResultsPanel { get; protected set; } = true;
         public string ProgressMessage { get; protected set; }
         public string ResultMessage { get; protected set; } = String.Empty;
-        public UIComponent UITemplate => _template ? _template: _defaultTemplate;
-
+        public UIComponent UITemplatePrepare => _templatePrepare;
+        public UIComponent UITemplateResults => _template ? _template : _defaultTemplate;
         public YieldInstruction CustomYieldInstruction { get; protected set; } = null;
-         public virtual void InitResultsView(UIComponent component) {
+
+        public virtual void InitResultsView(UIComponent component) {
             if (component is UILabel label) {
                 label.textScale = 1.2f;
                 label.text = ResultMessage;
             }
-        } 
-        
+        }
+
+        public virtual void InitPrepareView(UIComponent component) {
+            
+        }
+
         protected void SetTaskProgress(AsyncTaskBase task, int steps) {
             typeof(AsyncTaskBase)
                 .GetField("m_ProgressSteps", BindingFlags.Instance | BindingFlags.NonPublic)
@@ -51,6 +62,12 @@ namespace BrokenNodeDetector.UI.Tools {
                 UnityEngine.Object.Destroy(_template.gameObject);
                 _template = null;
             }
+            
+            if (_templatePrepare) {
+                UnityEngine.Object.Destroy(_templatePrepare.gameObject);
+                _templatePrepare = null;
+            }
+
             if (_defaultTemplate) {
                 UnityEngine.Object.Destroy(_defaultTemplate.gameObject);
                 _defaultTemplate = null;
@@ -59,17 +76,20 @@ namespace BrokenNodeDetector.UI.Tools {
     }
 
     public interface IDetector {
-        event Action OnFinished;
         string Name { get; }
         string Tooltip { get; }
+        bool UsePrepareStep { get; }
+        IEnumerable<bool> Prepare();
         IEnumerable<float> Process();
         bool IsProcessing { get; }
         bool ShowResultsPanel { get; }
         string ProgressMessage { get; }
         string ResultMessage { get; }
-        [CanBeNull] UIComponent UITemplate { get; }
+        [CanBeNull] UIComponent UITemplateResults { get; }
         void InitResultsView(UIComponent component);
-        
+        [CanBeNull] UIComponent UITemplatePrepare { get; }
+        void InitPrepareView(UIComponent component);
+
         [CanBeNull] YieldInstruction CustomYieldInstruction { get; }
     }
 

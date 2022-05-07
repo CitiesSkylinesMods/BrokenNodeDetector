@@ -1,10 +1,12 @@
 using System.Collections.Generic;
+using System.Linq;
 using ColossalFramework.UI;
 using UnityEngine;
 
 namespace BrokenNodeDetector {
     public class ModService {
         private readonly Dictionary<ushort, uint> _nodeCalls;
+        private readonly HashSet<ushort> _pfFailCalls;
         private bool _prevSimState;
 
         static ModService() {
@@ -13,12 +15,18 @@ namespace BrokenNodeDetector {
 
         private ModService() {
             _nodeCalls = new Dictionary<ushort, uint>();
+            _pfFailCalls = new HashSet<ushort>();
             Results = new List<ushort>();
         }
 
         private bool IsWorking { get; set; }
+        private bool IsWorkingPf { get; set; }
+        private HighlightData _data;
         public static ModService Instance { get; private set; }
         public List<ushort> Results { get; private set; }
+        public List<ushort> ResultsPf => _pfFailCalls.ToList();
+
+        public ushort SelectedBuilding { get; set; }
 
         public bool KeybindEditInProgress { get; private set; }
 
@@ -42,6 +50,32 @@ namespace BrokenNodeDetector {
             }
             IsWorking = false;
             AnalyzeData();
+        }
+
+        public void StartSelection(HighlightData data) {
+            _data = data;
+            SelectedBuilding = 0;
+            BndResultHighlightManager.instance.StartBuildingHoverHighlighter(_data);
+        }
+
+        public void StopSelection(bool clear = true) {
+            BndResultHighlightManager.instance.StopBuildingHoverHighlighter();
+            if (clear) {
+                _data = null;
+            }
+        }
+
+        public void StartPathFailedDetector() {
+            if (IsWorkingPf) return;
+
+            _pfFailCalls.Clear();
+            IsWorkingPf = true;
+        }
+
+        public void StopPathFailedDetector() {
+            if (!IsWorkingPf) return;
+
+            IsWorkingPf = false;
         }
 
         public void OnUpdateLaneConnection(ushort nodeID) {
@@ -70,6 +104,19 @@ namespace BrokenNodeDetector {
 
         public void FinishKeybindEdit() {
             KeybindEditInProgress = false;
+        }
+
+        public void OnPathFindFailure(ushort vehicleID, ref Vehicle data) {
+            if (!IsWorkingPf) return;
+
+            ushort buildingId = SelectedBuilding;
+            if (buildingId != 0){
+                if (data.m_sourceBuilding == buildingId) {
+                    _pfFailCalls.Add(data.m_targetBuilding);
+                } else if (data.m_targetBuilding == buildingId) {
+                    _pfFailCalls.Add(data.m_sourceBuilding);
+                }
+            }
         }
     }
 

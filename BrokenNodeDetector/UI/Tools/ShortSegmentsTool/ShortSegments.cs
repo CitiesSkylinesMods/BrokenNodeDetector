@@ -13,6 +13,7 @@ namespace BrokenNodeDetector.UI.Tools.ShortSegmentsTool {
         private readonly HashSet<string> _skipAssets = new HashSet<string> {"2131871143", "2131871948"};
         private readonly Dictionary<uint, SegmentInfo> _shortSegments = new Dictionary<uint, SegmentInfo>();
         private uint _currentSegment;
+        private volatile float _progress;
         
         public ShortSegments() {
             BuildTemplate();
@@ -28,11 +29,10 @@ namespace BrokenNodeDetector.UI.Tools.ShortSegmentsTool {
             IsProcessing = true;
             _shortSegments.Clear();
 
+            _progress = 0;
             AsyncTask<float> asyncTask = SimulationManager.instance.AddAction(ProcessInternal());
-            SetTaskProgress(asyncTask, (int)(NetManager.instance.m_segments.m_size / 32));
-            while (asyncTask.progress < 1.0f) {
-                float progress = asyncTask.progress;
-                yield return progress < 0 ? 0 : progress;
+            while (!asyncTask.completed) {
+                yield return _progress;
             }
 
             IsProcessing = true;
@@ -74,14 +74,14 @@ namespace BrokenNodeDetector.UI.Tools.ShortSegmentsTool {
                 if (i % 32 == 0) {
                     ProgressMessage = $"Processing...{searchProgress * 100:F0}%";
                     Thread.Sleep(1);
-                    yield return searchProgress;
+                    _progress = searchProgress;
                 }
             }
             ProgressMessage = $"Processing...100%";
 
             Debug.Log($"[BND] Too short segment count: {_shortSegments.Count}");
             Debug.Log($"[BND] Search report\n{sb}\n\n=======================================================");
-            
+            yield return 1.0f;
         }
 
         private void ResetState() {

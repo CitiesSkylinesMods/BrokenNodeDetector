@@ -7,13 +7,14 @@ using UnityEngine;
 namespace BrokenNodeDetector.UI {
     public class MainPanel : UIPanel {
         private const int PANEL_WIDTH = 400;
-        private const int PANEL_HEIGHT = 320;
+        private const int PANEL_HEIGHT = 350;
         private UIButton _closeButton;
         private DetectorFactory _detectorFactory;
         private UIPanel _detectorsPanel;
         private UIDragHandle _dragHandle;
         private ProgressPanel _progressPanel;
         private ResultsPanel _resultsPanel;
+        private PreparePanel _preparePanel;
         private UIButton _returnButton;
         private UILabel _title;
 
@@ -30,6 +31,7 @@ namespace BrokenNodeDetector.UI {
             CreateReturnButton();
             CreateCloseButton();
             CreateDetectorsPanel();
+            CreatePreparePanel();
             CreateProgressPanel();
             CreateResultsPanel();
             AddDetectors();
@@ -109,6 +111,13 @@ namespace BrokenNodeDetector.UI {
             _detectorsPanel.width = 400;
             _detectorsPanel.height = 255;
         }
+        
+        private void CreatePreparePanel() {
+            _preparePanel = AddUIComponent<PreparePanel>();
+            _preparePanel.relativePosition = new Vector3(0, _title.height + 10);
+            _preparePanel.Hide();
+            _preparePanel.OnPrepareFinished += OnPrepareFinished;
+        }
 
         private void CreateProgressPanel() {
             _progressPanel = AddUIComponent<ProgressPanel>();
@@ -150,10 +159,18 @@ namespace BrokenNodeDetector.UI {
 
         private void OnDetectorButtonClick(UIComponent component, UIMouseEventParameter param) {
             if (component.objectUserData is IDetector detector) {
-                RunFadeInOutAnimations(_detectorsPanel, _progressPanel, () => {
-                    height = 145;
-                    _progressPanel.UseDetector(detector);
-                });
+                if (detector.UsePrepareStep) {
+                    RunFadeInOutAnimations(_detectorsPanel, _preparePanel, () => {
+                        _returnButton.Show();
+                        height = 120;
+                        _preparePanel.UseDetector(detector);
+                    });
+                } else {
+                    RunFadeInOutAnimations(_detectorsPanel, _progressPanel, () => {
+                        height = 145;
+                        _progressPanel.UseDetector(detector);
+                    });
+                }
             }
         }
 
@@ -169,10 +186,21 @@ namespace BrokenNodeDetector.UI {
             }
         }
 
+        private void OnPrepareFinished(IDetector detector) {
+            RunFadeInOutAnimations(_preparePanel, _progressPanel, () => {
+                _returnButton.Hide();
+                height = 145;
+                _progressPanel.UseDetector(detector);
+            });
+        }
+
         private void OnResultsClose(bool updateHeight = false) {
             _returnButton.Hide();
             RunFadeInOutAnimations(_resultsPanel, _detectorsPanel);
-            BndResultHighlightManager.instance.enabled = false;
+            if (BndResultHighlightManager.instance) {
+                BndResultHighlightManager.instance.enabled = false;
+            }
+
             if (updateHeight) {
                 height = PANEL_HEIGHT;
             }
@@ -226,6 +254,8 @@ namespace BrokenNodeDetector.UI {
 
         private void OnClose(bool resetOnly = true) {
             _detectorsPanel.Show();
+            _preparePanel.CancelPrepare();
+            _preparePanel.Hide();
             _resultsPanel.Hide();
             _progressPanel.Hide();
             _returnButton.Hide();

@@ -54,7 +54,7 @@ namespace BrokenNodeDetector.UI.Tools.SegmentUpdateTool {
         private void UpdateSegmentsInternal(ushort[] segments, int batchNumber) {
             NetManager netManager = NetManager.instance;
             int updated = 0;
-            Debug.Log($"Requested update of {segments.Length} segments in batch {batchNumber}");
+            Debug.Log($"[BND] Requested update of {segments.Length} segments in batch {batchNumber}");
             for (int i = 0; i < segments.Length; i++) {
                 ref NetSegment segment = ref netManager.m_segments.m_buffer[segments[i]];
                 if ((segment.m_flags & NetSegment.Flags.Created) != 0 && segment.Info && segment.Info.m_netAI is RoadBaseAI) {

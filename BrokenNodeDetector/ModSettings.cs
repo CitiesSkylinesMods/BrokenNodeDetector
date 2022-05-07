@@ -1,3 +1,5 @@
+using System;
+using System.Reflection;
 using ColossalFramework;
 using UnityEngine;
 
@@ -30,6 +32,11 @@ namespace BrokenNodeDetector {
                 GameSettings.AddSettingsFile(new SettingsFile {fileName = FILE_NAME});
 
             _settingsFile = GameSettings.FindSettingsFileByName(FILE_NAME);
+        }
+
+        private void OnDestroy() {
+            GetType().GetField("sInstance", BindingFlags.NonPublic | BindingFlags.Static)
+                ?.SetValue(null, null);
         }
     }
 }

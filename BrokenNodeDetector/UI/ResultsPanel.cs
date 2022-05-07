@@ -26,8 +26,8 @@ namespace BrokenNodeDetector.UI {
                 _detectorResultsView = null;
             }
             
-            if (detector.UITemplate) {
-                _detectorResultsView = Object.Instantiate(detector.UITemplate);
+            if (detector.UITemplateResults) {
+                _detectorResultsView = Object.Instantiate(detector.UITemplateResults);
                 AttachUIComponent(_detectorResultsView.gameObject);
                 _detectorResultsView.relativePosition = new Vector3(0, 30);
                 detector.InitResultsView(_detectorResultsView);

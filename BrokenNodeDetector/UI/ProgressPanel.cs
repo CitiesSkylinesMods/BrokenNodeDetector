@@ -81,7 +81,7 @@ namespace BrokenNodeDetector.UI {
             _progressLabel.text = "Processing done";
             _progressBar.value = 1.0f;
             _processing = false;
-            yield return new WaitForSeconds(2);
+            yield return new WaitForSeconds(1);
             OnProcessFinished?.Invoke(detector);
         }
     }
