@@ -83,8 +83,20 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedPublicTransportStopsTool {
                 }
             }
 
+
             Debug.Log("[BND] Invalid lanes number: " + InvalidLines.Keys.Count);
             Debug.Log("[BND] Search report\n" + sb + "\n\n=======================================================");
+            
+            Debug.Log("[BND] Testing nodes one-by-one...");
+            NetNode[] nodes = NetManager.instance.m_nodes.m_buffer;
+            for (int i = 0; i < nodes.Length; i++) 
+            {
+                if ((nodes[i].m_flags & NetNode.Flags.Created) != 0 && (nodes[i].m_problems & Notification.Problem.LineNotConnected) != 0)
+                {
+                    Debug.Log($"[BND] Broken node {i}, info: {nodes[i].Info?.name}, lane: {nodes[i].m_lane} flags: [{nodes[i].m_flags}]," +
+                        $" segments: [{string.Join(",", Enumerable.Range(0,8).Select(n => nodes[i].GetSegment(n)).Where(n => n != 0).Select(n => $"[{n}: s: {NetManager.instance.m_segments.m_buffer[n].m_startNode}, e: {NetManager.instance.m_segments.m_buffer[n].m_endNode}]").ToArray())}]");
+                }
+            }
             yield return 1.0f;
         }
 

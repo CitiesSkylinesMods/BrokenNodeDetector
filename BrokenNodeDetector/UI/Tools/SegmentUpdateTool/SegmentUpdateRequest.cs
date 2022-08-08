@@ -1,3 +1,4 @@
+#if SEGMENT_UPDATER
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -66,3 +67,4 @@ namespace BrokenNodeDetector.UI.Tools.SegmentUpdateTool {
         }
     }
 }
+#endif

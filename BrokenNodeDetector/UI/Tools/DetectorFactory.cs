@@ -8,8 +8,10 @@ using BrokenNodeDetector.UI.Tools.DisconnectedBuildingsTool;
 using BrokenNodeDetector.UI.Tools.DisconnectedPublicTransportStopsTool;
 using BrokenNodeDetector.UI.Tools.StuckCimsTool;
 using BrokenNodeDetector.UI.Tools.GhostNodesTool;
-using BrokenNodeDetector.UI.Tools.SegmentUpdateTool;
 using BrokenNodeDetector.UI.Tools.ShortSegmentsTool;
+#if SEGMENT_UPDATER
+using BrokenNodeDetector.UI.Tools.SegmentUpdateTool;
+#endif
 using UnityEngine;
 
 namespace BrokenNodeDetector.UI.Tools {
@@ -23,7 +25,9 @@ namespace BrokenNodeDetector.UI.Tools {
                 new ShortSegments(),
                 new DisconnectedBuildings(),
                 new DisconnectedPublicTransportStops(),
-                new SegmentUpdateRequest(),
+#if SEGMENT_UPDATER
+                // new SegmentUpdateRequest(),
+#endif
                 new BrokenProps(),
                 new StuckCims(),
                 new BrokenPaths(),
