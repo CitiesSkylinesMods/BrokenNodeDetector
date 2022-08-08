@@ -6,6 +6,7 @@ using BrokenNodeDetector.UI.Tools.BrokenPathTool;
 using BrokenNodeDetector.UI.Tools.BrokenPropsTool;
 using BrokenNodeDetector.UI.Tools.DisconnectedBuildingsTool;
 using BrokenNodeDetector.UI.Tools.DisconnectedPublicTransportStopsTool;
+using BrokenNodeDetector.UI.Tools.StuckCimsTool;
 using BrokenNodeDetector.UI.Tools.GhostNodesTool;
 using BrokenNodeDetector.UI.Tools.SegmentUpdateTool;
 using BrokenNodeDetector.UI.Tools.ShortSegmentsTool;
@@ -24,6 +25,7 @@ namespace BrokenNodeDetector.UI.Tools {
                 new DisconnectedPublicTransportStops(),
                 new SegmentUpdateRequest(),
                 new BrokenProps(),
+                new StuckCims(),
                 new BrokenPaths(),
             };
         }

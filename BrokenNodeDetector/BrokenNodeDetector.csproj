@@ -37,6 +37,7 @@
     <Compile Include="BrokenNodeDetector.cs" />
     <Compile Include="Highlighter\BrokenNodeHighlight.cs" />
     <Compile Include="Highlighter\BuildingHighlight.cs" />
+    <Compile Include="Highlighter\CitizenHighlight.cs" />
     <Compile Include="Highlighter\IHighlightable.cs" />
     <Compile Include="Highlighter\PTStopHighlight.cs" />
     <Compile Include="Highlighter\SegmentHighlight.cs" />
@@ -44,6 +45,7 @@
     <Compile Include="LoadingExtension.cs" />
     <Compile Include="ModService.cs" />
     <Compile Include="Patch\_CarAI\PathfindFailurePatch.cs" />
+    <Compile Include="Patch\_HumanAI\InvalidPathPatch.cs" />
     <Compile Include="Patch\_NetNode\UpdateLaneConnectionPatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResultHighlight.cs" />
@@ -65,7 +67,9 @@
     <Compile Include="UI\Tools\SegmentUpdateTool\SegmentUpdateRequest.cs" />
     <Compile Include="UI\Tools\ShortSegmentsTool\ShortSegments.cs" />
     <Compile Include="UI\Tools\BndColorAnimator.cs" />
+    <Compile Include="UI\Tools\StuckCimsTool\StuckCims.cs" />
     <Compile Include="UI\Tools\UIHelpers.cs" />
+    <Compile Include="UI\Tools\Utils\UnityExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">

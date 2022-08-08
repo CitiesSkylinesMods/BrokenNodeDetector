@@ -27,7 +27,8 @@ namespace BrokenNodeDetector {
                 {HighlightType.Building, new BuildingHighlight()},
                 {HighlightType.Segment, new SegmentHighlight()},
                 {HighlightType.PTStop, new PTStopHighlight()},
-                {HighlightType.Node, new BrokenNodeHighlight()}
+                {HighlightType.Node, new BrokenNodeHighlight()},
+                {HighlightType.Citizen, new CitizenHighlight()}
             };
             _instantiated = true;
         }
@@ -74,9 +75,9 @@ namespace BrokenNodeDetector {
         private bool RayCast(ToolBase.RaycastInput input, out ToolBase.RaycastOutput output) {
             Vector3 origin = input.m_ray.origin;
             Vector3 normalized = input.m_ray.direction.normalized;
-            Vector3 _b = input.m_ray.origin + normalized * input.m_length;
-            Segment3 ray = new Segment3(origin, _b);
-            output.m_hitPos = _b;
+            Vector3 b = input.m_ray.origin + normalized * input.m_length;
+            Segment3 ray = new Segment3(origin, b);
+            output.m_hitPos = b;
             output.m_overlayButtonIndex = 0;
             output.m_netNode = 0;
             output.m_netSegment = 0;
@@ -129,14 +130,14 @@ namespace BrokenNodeDetector {
             _rayValid = !ToolsModifierControl.toolController.IsInsideUI && Cursor.visible;
         }
 
-        public void StartBuildingHoverHighlighter(HighlightData data) {
+        public void StartHoverHighlighter(HighlightData data, HighlightType type) {
             _hoverData = data;
-            if (data.Type != HighlightType.Building) return;
+            if (data.Type != type) return;
             EnsureHighlighter(data);
             enabled = true;
         }
         
-        public void StopBuildingHoverHighlighter() {
+        public void StopHoverHighlighter() {
             if (_hoverData == null) return;
             
             _hoverData = null;

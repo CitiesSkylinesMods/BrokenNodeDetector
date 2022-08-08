@@ -39,7 +39,7 @@ namespace BrokenNodeDetector
                 Object.Destroy(LoadingExtension.MainUi.gameObject);
             }
 
-            if (ModSettings.exists) {
+            if (ModSettings.exists && ModSettings.instance) {
                 Object.Destroy(ModSettings.instance.gameObject);
             }
 #if TEST_UI

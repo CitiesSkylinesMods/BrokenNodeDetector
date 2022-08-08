@@ -7,6 +7,8 @@ namespace BrokenNodeDetector {
     public class ModService {
         private readonly Dictionary<ushort, uint> _nodeCalls;
         private readonly HashSet<ushort> _pfFailCalls;
+        private Dictionary<uint, int> _pfFailPerInstance;
+
         private bool _prevSimState;
 
         static ModService() {
@@ -16,15 +18,19 @@ namespace BrokenNodeDetector {
         private ModService() {
             _nodeCalls = new Dictionary<ushort, uint>();
             _pfFailCalls = new HashSet<ushort>();
+            _pfFailPerInstance = new Dictionary<uint, int>();
             Results = new List<ushort>();
         }
 
         private bool IsWorking { get; set; }
         private bool IsWorkingPf { get; set; }
+        private bool IsWorkingCimPf { get; set; }
         private HighlightData _data;
         public static ModService Instance { get; private set; }
         public List<ushort> Results { get; private set; }
         public List<ushort> ResultsPf => _pfFailCalls.ToList();
+        public Dictionary<uint, int> ResultsPfPerInstance => new Dictionary<uint, int>(_pfFailPerInstance.Where(p => p.Value > 2).Take(15).ToDictionary(p => p.Key, p => p.Value));
+        public int ResultsPfPerInstanceCount => _pfFailPerInstance.Count(p => p.Value > 2);
 
         public ushort SelectedBuilding { get; set; }
 
@@ -52,14 +58,14 @@ namespace BrokenNodeDetector {
             AnalyzeData();
         }
 
-        public void StartSelection(HighlightData data) {
+        public void StartSelection(HighlightData data, HighlightType type) {
             _data = data;
             SelectedBuilding = 0;
-            BndResultHighlightManager.instance.StartBuildingHoverHighlighter(_data);
+            BndResultHighlightManager.instance.StartHoverHighlighter(_data, type);
         }
 
         public void StopSelection(bool clear = true) {
-            BndResultHighlightManager.instance.StopBuildingHoverHighlighter();
+            BndResultHighlightManager.instance.StopHoverHighlighter();
             if (clear) {
                 _data = null;
             }
@@ -72,10 +78,25 @@ namespace BrokenNodeDetector {
             IsWorkingPf = true;
         }
 
+        public void StartCimPathFailedDetector() {
+            if (IsWorkingCimPf) return;
+
+            IsWorkingPf = false;
+            _pfFailCalls.Clear();
+            _pfFailPerInstance.Clear();
+            IsWorkingCimPf = true;
+        }
+
         public void StopPathFailedDetector() {
             if (!IsWorkingPf) return;
 
             IsWorkingPf = false;
+        }
+        
+        public void StopCimPathFailedDetector() {
+            if (!IsWorkingCimPf) return;
+
+            IsWorkingCimPf = false;
         }
 
         public void OnUpdateLaneConnection(ushort nodeID) {
@@ -116,6 +137,16 @@ namespace BrokenNodeDetector {
                 } else if (data.m_targetBuilding == buildingId) {
                     _pfFailCalls.Add(data.m_sourceBuilding);
                 }
+            }
+        }
+
+        public void OnPathfindFailure(uint cimId) {
+            if (!IsWorkingCimPf) return;
+
+            if (!_pfFailPerInstance.ContainsKey(cimId)) {
+                _pfFailPerInstance.Add(cimId, 1);
+            } else {
+                _pfFailPerInstance[cimId] += 1;
             }
         }
     }

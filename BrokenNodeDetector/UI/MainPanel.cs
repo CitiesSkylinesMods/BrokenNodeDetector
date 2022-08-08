@@ -96,11 +96,12 @@ namespace BrokenNodeDetector.UI {
         private void CreateReturnButton() {
             _returnButton = AddUIComponent<UIButton>();
             _returnButton.eventClick += ReturnButtonClick;
-            _returnButton.relativePosition = new Vector3(5, 8f);
+            _returnButton.relativePosition = new Vector3(8, 8f);
             _returnButton.normalBgSprite = "ArrowLeft";
             _returnButton.hoveredBgSprite = "ArrowLeftHover";
             _returnButton.pressedBgSprite = "ArrowLeftPressed";
             _returnButton.size = new Vector2(30, 30);
+            _returnButton.tooltip = "Return to tool selection";
             _returnButton.Hide();
         }
 

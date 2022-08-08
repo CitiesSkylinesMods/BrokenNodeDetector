@@ -34,7 +34,7 @@ namespace BrokenNodeDetector.UI.Tools.BrokenPathTool {
             ProgressMessage = "Click at a building to select";
             _selectedBuildingId = 0;
             _highlightData.BuildingID = 0;
-            ModService.Instance.StartSelection(_highlightData);
+            ModService.Instance.StartSelection(_highlightData, HighlightType.Building);
             while (ModService.Instance.SelectedBuilding == 0) {
                 yield return true;
             }

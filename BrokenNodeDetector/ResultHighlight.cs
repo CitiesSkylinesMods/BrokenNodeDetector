@@ -10,6 +10,7 @@ namespace BrokenNodeDetector {
         public uint BuildingID;
         public uint SegmentID;
         public uint NodeID;
+        public uint CitizenInstanceID;
         public HighlightType Type;
         public bool AnimatedColor;
         public Color CurrentColor;
@@ -18,11 +19,12 @@ namespace BrokenNodeDetector {
             BuildingID = 0;
             SegmentID = 0;
             NodeID = 0;
+            CitizenInstanceID = 0;
             Type = type;
         }
 
         public override string ToString() {
-            return $"B: {BuildingID} |S: {SegmentID} |N: {NodeID} |Type: {Type}";
+            return $"B: {BuildingID} |S: {SegmentID} |N: {NodeID} |C: {CitizenInstanceID} |Type: {Type}";
         }
     }
 
@@ -32,5 +34,6 @@ namespace BrokenNodeDetector {
         Node,
         PTStop,
         Building,
+        Citizen,
     }
 }

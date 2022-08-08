@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using BrokenNodeDetector.UI.Tools;
+using BrokenNodeDetector.UI.Tools.Utils;
 using ColossalFramework.UI;
 using UnityEngine;
 
@@ -62,7 +63,7 @@ namespace BrokenNodeDetector.UI {
                 return;
             _processing = true;
             _titleLabel.text = detector.Name;
-            StartCoroutine(ProcessingImpl(detector));
+            this.StartExceptionHandledIterator(ProcessingImpl(detector), UnityExtensions.DefaultExceptionHandler);
         }
 
         private IEnumerator ProcessingImpl(IDetector detector) {
