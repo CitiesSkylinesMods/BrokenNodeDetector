@@ -91,7 +91,7 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedPublicTransportStopsTool {
             NetNode[] nodes = NetManager.instance.m_nodes.m_buffer;
             for (int i = 0; i < nodes.Length; i++) 
             {
-                if ((nodes[i].m_flags & NetNode.Flags.Created) != 0 && (nodes[i].m_problems & Notification.Problem.LineNotConnected) != 0)
+                if ((nodes[i].m_flags & NetNode.Flags.Created) != 0 && (nodes[i].m_problems.m_Problems1 & Notification.Problem1.LineNotConnected) != 0)
                 {
                     Debug.Log($"[BND] Broken node {i}, info: {nodes[i].Info?.name}, lane: {nodes[i].m_lane} flags: [{nodes[i].m_flags}]," +
                         $" segments: [{string.Join(",", Enumerable.Range(0,8).Select(n => nodes[i].GetSegment(n)).Where(n => n != 0).Select(n => $"[{n}: s: {NetManager.instance.m_segments.m_buffer[n].m_startNode}, e: {NetManager.instance.m_segments.m_buffer[n].m_endNode}]").ToArray())}]");
@@ -114,7 +114,7 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedPublicTransportStopsTool {
             bool allConnected = true;
             ushort firstId = line.m_stops;
             ref NetNode node = ref NetManager.instance.m_nodes.m_buffer[firstId];
-            allConnected = allConnected && (node.m_problems & Notification.Problem.LineNotConnected) == 0;
+            allConnected = allConnected && (node.m_problems.m_Problems1 & Notification.Problem1.LineNotConnected) == 0;
             AppendStopInfo(sb, ref node, firstId);
 
             if (firstId != 0) {
@@ -122,7 +122,7 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedPublicTransportStopsTool {
 
                 while (next != 0 && firstId != next) {
                     NetNode nextNode = NetManager.instance.m_nodes.m_buffer[next];
-                    allConnected = allConnected && (nextNode.m_problems & Notification.Problem.LineNotConnected) == 0;
+                    allConnected = allConnected && (nextNode.m_problems.m_Problems1 & Notification.Problem1.LineNotConnected) == 0;
                     AppendStopInfo(sb, ref nextNode, next);
                     next = TransportLine.GetPrevStop(next);
                 }
@@ -135,7 +135,7 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedPublicTransportStopsTool {
         }
 
         private static void AppendStopInfo(StringBuilder sb, ref NetNode node, ushort nodeId) {
-            sb.Append((node.m_problems & Notification.Problem.LineNotConnected) != 0 ? " * " : "   ")
+            sb.Append((node.m_problems.m_Problems1 & Notification.Problem1.LineNotConnected) != 0 ? " * " : "   ")
                 .Append("Id: ").Append(nodeId)
                 .Append(" Flags: (").Append(node.m_flags.ToString())
                 .Append(") Building ID: [").Append(node.m_building)

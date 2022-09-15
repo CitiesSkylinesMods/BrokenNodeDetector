@@ -1,6 +1,7 @@
 using System;
 using ColossalFramework;
 using ColossalFramework.UI;
+using EManagersLib.API;
 using ICities;
 using UnityEngine;
 
@@ -24,7 +25,10 @@ namespace BrokenNodeDetector.UI {
             UIHelperBase group2 = helper.AddGroup("Other");
             UIPanel panel2 = CreateRowPanel((UIPanel) ((UIHelper) group2).self);
             CreateResetMenuPosition(panel2);
-            
+            CreateLabel(panel2, $"EML integration active: {(PropAPI.m_isEMLInstalled ? "<color #00FF00>Yes</color>" : "No")}", 1f, true);
+            panel2.autoLayoutDirection = LayoutDirection.Vertical;
+            panel2.autoLayoutPadding = new RectOffset(0, 0, 10, 10);
+            panel2.autoSize = true;
         }
 
         public void CreateResetMenuPosition(UIPanel parent) {
@@ -51,7 +55,7 @@ namespace BrokenNodeDetector.UI {
             return rowPanel;
         }
 
-        public UILabel CreateLabel(UIPanel parent, string text, float widthFraction) {
+        public UILabel CreateLabel(UIPanel parent, string text, float widthFraction, bool markup = false) {
             var label = parent.AddUIComponent<UILabel>();
             label.wordWrap = true;
             label.autoSize = false;
@@ -59,6 +63,9 @@ namespace BrokenNodeDetector.UI {
             label.text = text;
             label.verticalAlignment = UIVerticalAlignment.Middle;
             label.textAlignment = UIHorizontalAlignment.Left;
+            if (markup) {
+                label.processMarkup = true;
+            }
             return label;
         }
 

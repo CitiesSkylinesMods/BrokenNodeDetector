@@ -14,7 +14,7 @@ using Object = UnityEngine.Object;
 namespace BrokenNodeDetector {
     public class LoadingExtension : LoadingExtensionBase {
         public bool DetourInited { get; private set; }
-        public static MainUI MainUi { get; private set; }
+        public static MainUI MainUi { get; internal set; }
 
         private bool _created;
 

@@ -41,6 +41,7 @@ namespace BrokenNodeDetector.UI.Tools.Utils
 
         private static void OnException([CanBeNull] Exception e) {
             if (e != null) {
+                Debug.LogException(e);
                 UIView.ForwardException(e);
             }
         }

@@ -89,7 +89,7 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedBuildingsTool {
                                     ? building.CalculateSidewalkPosition(0.0f, 4f)
                                     : building.CalculateSidewalkPosition(building.Width * -4f, 4f))
                                 : building.CalculateSidewalkPosition(building.Width * 4f, 4f);
-                            object[] args = { (ushort)i, building, position };
+                            object[] args = { (ushort)i, building, position, null, true, false };
                             if (!(bool)findRoadAccess.Invoke(buildingAI, args))
                                 connected = false;
                         }
@@ -103,7 +103,7 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedBuildingsTool {
                                 .Append(" [name: ").Append(building.Info.name).Append("]");
                             sb.AppendLine("---------------------------------------");
                         }
-                    } else if ((building.m_flags & Building.Flags.RoadAccessFailed) != 0 || (building.m_problems & Notification.Problem.RoadNotConnected) != 0) {
+                    } else if ((building.m_flags & Building.Flags.RoadAccessFailed) != 0 || (building.m_problems.m_Problems1 & Notification.Problem1.RoadNotConnected) != 0) {
                         _disconnectedBuildings.Add((ushort)i, building.m_position);
                         sb.AppendLine("==(" + i + ")===(" + building.m_position + ")=");
                         sb.Append("building ")

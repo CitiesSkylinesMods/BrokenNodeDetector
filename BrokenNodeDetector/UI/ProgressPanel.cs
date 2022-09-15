@@ -12,11 +12,13 @@ namespace BrokenNodeDetector.UI {
         private UILabel _progressLabel;
         private UILabel _titleLabel;
         private bool _processing;
+        private Action<Exception> _exceptionThrownAction;
 
         public event Action<IDetector> OnProcessFinished;
 
         public override void Awake() {
             base.Awake();
+            _exceptionThrownAction = OnExceptionThrown;
             autoLayout = false;
             width = 400;
             height = 100;
@@ -48,6 +50,7 @@ namespace BrokenNodeDetector.UI {
         public override void OnDestroy() {
             base.OnDestroy();
             OnProcessFinished = null;
+            _exceptionThrownAction = null;
             _mainPanel = null;
             _progressBar = null;
             _progressLabel = null;
@@ -63,7 +66,18 @@ namespace BrokenNodeDetector.UI {
                 return;
             _processing = true;
             _titleLabel.text = detector.Name;
-            this.StartExceptionHandledIterator(ProcessingImpl(detector), UnityExtensions.DefaultExceptionHandler);
+            this.StartExceptionHandledIterator(ProcessingImpl(detector), _exceptionThrownAction);
+        }
+        private void OnExceptionThrown(Exception e) {
+            if (e != null) {
+                Debug.LogException(e);
+                UIView.ForwardException(e);
+            }
+            
+            _progressLabel.text = "Processing interrupted!";
+            _progressBar.value = 1.0f;
+            _processing = false;
+            OnProcessFinished?.Invoke(null);
         }
 
         private IEnumerator ProcessingImpl(IDetector detector) {

@@ -9,6 +9,7 @@ using BrokenNodeDetector.UI.Tools.DisconnectedPublicTransportStopsTool;
 using BrokenNodeDetector.UI.Tools.StuckCimsTool;
 using BrokenNodeDetector.UI.Tools.GhostNodesTool;
 using BrokenNodeDetector.UI.Tools.ShortSegmentsTool;
+using EManagersLib.API;
 #if SEGMENT_UPDATER
 using BrokenNodeDetector.UI.Tools.SegmentUpdateTool;
 #endif
@@ -28,7 +29,7 @@ namespace BrokenNodeDetector.UI.Tools {
 #if SEGMENT_UPDATER
                 // new SegmentUpdateRequest(),
 #endif
-                new BrokenProps(),
+                (PropAPI.m_isEMLInstalled ? (Detector)new BrokenPropsEML() : new BrokenProps()),
                 new StuckCims(),
                 new BrokenPaths(),
             };

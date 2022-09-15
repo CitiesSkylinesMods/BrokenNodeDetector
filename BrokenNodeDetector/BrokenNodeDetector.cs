@@ -29,6 +29,7 @@ namespace BrokenNodeDetector
             }
 #endif
 #if DEBUG
+            LoadingExtension.MainUi = (MainUI)UIView.GetAView().AddUIComponent(typeof(MainUI));
             LoadingExtension.Patcher.PatchAll();
 #endif
         }

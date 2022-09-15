@@ -176,7 +176,7 @@ namespace BrokenNodeDetector.UI {
         }
 
         private void OnDetectionFinished(IDetector detector) {
-            if (detector.ShowResultsPanel) {
+            if (detector != null && detector.ShowResultsPanel) {
                 _returnButton.Show();
                 RunFadeInOutAnimations(_progressPanel, _resultsPanel, () => {
                     _resultsPanel.UseDetector(detector);

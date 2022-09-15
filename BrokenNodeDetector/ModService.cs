@@ -183,7 +183,7 @@ namespace BrokenNodeDetector {
             while (next != 0 && last != next) {
                 AllStops++;
                 ref NetNode nextNode = ref NetManager.instance.m_nodes.m_buffer[next];
-                if ((nextNode.m_problems & Notification.Problem.LineNotConnected) != 0) {
+                if ((nextNode.m_problems.m_Problems1 & Notification.Problem1.LineNotConnected) != 0) {
                     Stops.Add(next);
                 }
                 next = TransportLine.GetPrevStop(next);
