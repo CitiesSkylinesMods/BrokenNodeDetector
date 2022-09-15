@@ -19,7 +19,7 @@ namespace BrokenNodeDetector.Highlighter {
             int length = buildingManager.m_buildings.m_buffer[buildingId].Length;
             Vector3 position = buildingManager.m_buildings.m_buffer[buildingId].m_position;
             float angle = buildingManager.m_buildings.m_buffer[buildingId].m_angle;
-            Color color = Color.red;
+            Color color = _data.AnimatedColor ? _data.CurrentColor : Color.red;
             color.a = 0.7f;
             BuildingTool.RenderOverlay(cameraInfo, info, length, position, angle, color, false);
         }
