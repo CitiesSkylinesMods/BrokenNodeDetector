@@ -370,9 +370,11 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedPublicTransportStopsTool {
                                 InvalidLines.Remove(_currentLine);
                                 _currentLine = 0;
                                 _currentStop = 0;
-                                UIPanel linePanel = component.parent.Find<UIPanel>(LINE_PANEL);
-                                UpdatePtButtons(linePanel);
-                                UpdateLinePanel(component.parent.Find<UILabel>(LABEL), linePanel);
+                                ThreadHelper.dispatcher.Dispatch(() => {
+                                    UIPanel linePanel = component.parent.Find<UIPanel>(LINE_PANEL);
+                                    UpdatePtButtons(linePanel);
+                                    UpdateLinePanel(component.parent.Find<UILabel>(LABEL), linePanel);
+                                });
                             }));
                 });
         }

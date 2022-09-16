@@ -7,7 +7,7 @@ using UnityEngine;
 namespace BrokenNodeDetector
 {
     public class BrokenNodeDetector : IUserMod {
-        public static readonly string Version = "0.7";
+        public static readonly string Version = "0.7.1";
 
         public string Name => "Broken Node Detector " + Version;
 
