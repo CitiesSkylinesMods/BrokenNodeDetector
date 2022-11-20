@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace BrokenNodeDetector.UI.Tools {
     public abstract class Detector : IDetector, IDisposable {
+        internal static GameObject _defaultGameObject = new GameObject("BND_Detectors");
         protected static UIComponent _defaultTemplate;
         protected UIComponent _template;
         protected UIComponent _templatePrepare;
@@ -52,6 +53,8 @@ namespace BrokenNodeDetector.UI.Tools {
             if (_defaultTemplate) return;
 
             UILabel label = new GameObject("Result Default UI").AddComponent<UILabel>();
+            label.gameObject.transform.SetParent(_defaultGameObject.transform, true);
+            label.gameObject.transform.SetParent(_defaultGameObject.transform, true);
             label.autoSize = true;
             label.padding = new RectOffset(10, 10, 15, 15);
             _defaultTemplate = label;
@@ -71,6 +74,13 @@ namespace BrokenNodeDetector.UI.Tools {
             if (_defaultTemplate) {
                 UnityEngine.Object.Destroy(_defaultTemplate.gameObject);
                 _defaultTemplate = null;
+            }
+        }
+
+        internal static void DisposeDefaultGameObject() {
+            if (_defaultGameObject) {
+                UnityEngine.Object.Destroy(_defaultGameObject);
+                _defaultGameObject = null;
             }
         }
     }

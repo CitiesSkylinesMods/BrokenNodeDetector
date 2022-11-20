@@ -22,6 +22,7 @@ namespace BrokenNodeDetector {
         private Dictionary<HighlightType, IHighlightable> _highlightables = new Dictionary<HighlightType, IHighlightable>();
         protected override void Awake() {
             base.Awake();
+            name = "BND_ResultHighlightManager";
             _mainCamera = Camera.main;
             _highlightables = new Dictionary<HighlightType, IHighlightable> {
                 {HighlightType.Building, new BuildingHighlight()},

@@ -130,6 +130,7 @@ namespace BrokenNodeDetector.UI.Tools.ShortSegmentsTool {
 
         private void BuildTemplate() {
             _template = new GameObject("ShortSegmentsTemplate").AddComponent<UIPanel>();
+            _template.transform.SetParent(_defaultGameObject.transform, true);
             _template.width = 400;
             _template.height = 50;
             UILabel label = _template.AddUIComponent<UILabel>();

@@ -161,6 +161,7 @@ namespace BrokenNodeDetector.UI.Tools.BrokenPathTool {
 
         private void BuildResultTemplate() {
             _template = new GameObject("BrokenPathsTemplate").AddComponent<UIPanel>();
+            _template.transform.SetParent(_defaultGameObject.transform, true);
             _template.width = 400;
             _template.height = 50;
             UILabel label = _template.AddUIComponent<UILabel>();
@@ -190,6 +191,7 @@ namespace BrokenNodeDetector.UI.Tools.BrokenPathTool {
 
         private void BuildPrepareTemplate() {
             _templatePrepare = new GameObject("BrokenPathsPrepareTemplate").AddComponent<UIPanel>();
+            _templatePrepare.transform.SetParent(_defaultGameObject.transform, true);
             _templatePrepare.width = 400;
             _templatePrepare.height = 50;
             UILabel label = _templatePrepare.AddUIComponent<UILabel>();
@@ -203,6 +205,7 @@ namespace BrokenNodeDetector.UI.Tools.BrokenPathTool {
 
         private void BuildRowTemplate() {
             UIPanel resultRow = new GameObject("BrokenPathsRowTemplate").AddComponent<UIPanel>();
+            resultRow.gameObject.transform.SetParent(_defaultGameObject.transform, true);
             resultRow.name = RESULT_ROW;
             resultRow.width = 400;
             resultRow.height = 40;

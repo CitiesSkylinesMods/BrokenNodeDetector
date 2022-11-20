@@ -20,6 +20,7 @@ namespace BrokenNodeDetector.UI {
 
         public override void Awake() {
             base.Awake();
+            name = "BND_MainPanel";
             autoLayout = false;
             width = PANEL_WIDTH;
             height = PANEL_HEIGHT;

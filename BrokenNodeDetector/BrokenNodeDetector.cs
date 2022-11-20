@@ -16,6 +16,7 @@ namespace BrokenNodeDetector
         private MainUI _testUI;
 #endif
 
+        [UsedImplicitly]
         public void OnEnabled() {
             Debug.Log($"[BND] Broken Node Detector enabled. Version {Version}");
             HarmonyHelper.EnsureHarmonyInstalled();
@@ -34,6 +35,7 @@ namespace BrokenNodeDetector
 #endif
         }
 
+        [UsedImplicitly]
         public void OnDisabled() {
             Debug.Log("[BND] Broken Node Detector disabled.");
             if (LoadingExtension.MainUi) {

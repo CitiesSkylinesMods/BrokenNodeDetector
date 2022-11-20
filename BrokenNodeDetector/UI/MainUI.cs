@@ -16,6 +16,7 @@ namespace BrokenNodeDetector.UI {
 
         public override void Awake() {
             base.Awake();
+            name = "BND_MainUI";
             var uiView = UIView.GetAView();
             MainPanel = (MainPanel) uiView.AddUIComponent(typeof(MainPanel));
             MainPanel.Initialize();

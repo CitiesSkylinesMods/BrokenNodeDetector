@@ -46,6 +46,7 @@ namespace BrokenNodeDetector.UI.Tools {
                 }
             }
             _detectors.Clear();
+            Detector.DisposeDefaultGameObject();
         }
     }
 }
