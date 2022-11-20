@@ -1,4 +1,5 @@
 using System;
+using BrokenNodeDetector.UI.Tools.Utils;
 using ColossalFramework;
 using ColossalFramework.UI;
 using EManagersLib.API;
@@ -13,6 +14,7 @@ namespace BrokenNodeDetector.UI {
     public class SettingsUI {
         private const float ROW_WIDTH = 744f - 15f;
         private const float ROW_HEIGHT = 34f;
+        private bool? _emlInstalled;
         
         private SavedInputKey _currentlyEditingBinding;
         
@@ -25,7 +27,12 @@ namespace BrokenNodeDetector.UI {
             UIHelperBase group2 = helper.AddGroup("Other");
             UIPanel panel2 = CreateRowPanel((UIPanel) ((UIHelper) group2).self);
             CreateResetMenuPosition(panel2);
-            CreateLabel(panel2, $"EML integration active: {(PropAPI.m_isEMLInstalled ? "<color #00FF00>Yes</color>" : "No")}", 1f, true);
+            
+            if (!_emlInstalled.HasValue) {
+                _emlInstalled = EmlUtils.IsEmlInstalled();
+            }
+            
+            CreateLabel(panel2, $"EML integration active: {(_emlInstalled.Value ? "<color #00FF00>Yes</color>" : "No")}", 1f, true);
             panel2.autoLayoutDirection = LayoutDirection.Vertical;
             panel2.autoLayoutPadding = new RectOffset(0, 0, 10, 10);
             panel2.autoSize = true;

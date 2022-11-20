@@ -2,16 +2,17 @@
 using BrokenNodeDetector.UI;
 using CitiesHarmony.API;
 using ColossalFramework.UI;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace BrokenNodeDetector
 {
     public class BrokenNodeDetector : IUserMod {
-        public static readonly string Version = "0.7.1";
+        public static readonly string Version = "0.7.2";
 
         public string Name => "Broken Node Detector " + Version;
 
-        public string Description => "Search for broken nodes when TM:PE vehicles despawn.";
+        public string Description => "Search for broken nodes when TM:PE vehicles despawn and more.";
 #if TEST_UI
         private MainUI _testUI;
 #endif

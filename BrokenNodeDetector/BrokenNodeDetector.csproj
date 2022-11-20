@@ -70,6 +70,7 @@
     <Compile Include="UI\Tools\BndColorAnimator.cs" />
     <Compile Include="UI\Tools\StuckCimsTool\StuckCims.cs" />
     <Compile Include="UI\Tools\UIHelpers.cs" />
+    <Compile Include="UI\Tools\Utils\EMLUtisl.cs" />
     <Compile Include="UI\Tools\Utils\UnityExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -90,7 +91,7 @@
     <Reference Include="EManagersLib.API">
       <HintPath>..\Dependencies\EManagersLib.API.dll</HintPath>
     </Reference>
-    <Reference Include="ICities, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="ICities, Version=1.15.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\Dependencies\ICities.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">

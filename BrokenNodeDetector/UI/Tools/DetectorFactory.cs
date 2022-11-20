@@ -19,7 +19,8 @@ namespace BrokenNodeDetector.UI.Tools {
     public class DetectorFactory : IDisposable {
         private List<Detector> _detectors;
         
-        public DetectorFactory() {
+        public DetectorFactory() {           
+            PropAPI.Initialize();
             _detectors = new List<Detector> {
                 new BrokenNodes(),
                 new GhostNodes(),
