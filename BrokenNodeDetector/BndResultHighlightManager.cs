@@ -99,8 +99,10 @@ namespace BrokenNodeDetector {
             Vector3 hit;
             bool found = false;
             if (input.m_ignoreBuildingFlags != Building.Flags.All && 
-                Singleton<BuildingManager>.instance.RayCast(ray, input.m_buildingService.m_service, input.m_buildingService.m_subService, input.m_buildingService.m_itemLayers, input.m_ignoreBuildingFlags, out hit, out output.m_building))
-            {
+                Singleton<BuildingManager>.instance.RayCast(ray, input.m_buildingService.m_service, input.m_buildingService.m_subService, input.m_buildingService.m_itemLayers, input.m_ignoreBuildingFlags, out hit, out ushort buildingId)) {
+
+                ushort parentBuilding = Building.FindParentBuilding(buildingId);
+                output.m_building = parentBuilding != 0 ? parentBuilding : buildingId;
                 float distance = Vector3.Distance(hit, origin);
                 if (distance < (double) len)
                 {
