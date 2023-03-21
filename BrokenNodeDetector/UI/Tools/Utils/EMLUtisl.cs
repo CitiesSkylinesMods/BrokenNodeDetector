@@ -3,6 +3,7 @@ using ColossalFramework;
 using ColossalFramework.Plugins;
 
 namespace BrokenNodeDetector.UI.Tools.Utils {
+#if BROKEN_PROPS_SCANNER
     public class EmlUtils {
         internal static bool IsEmlInstalled() {
             foreach (PluginManager.PluginInfo pluginInfo in Singleton<PluginManager>.instance.GetPluginsInfo()) {
@@ -20,4 +21,5 @@ namespace BrokenNodeDetector.UI.Tools.Utils {
             return false;
         }
     }
+#endif
 }

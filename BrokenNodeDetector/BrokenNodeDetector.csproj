@@ -88,9 +88,6 @@
     <Reference Include="ColossalManaged, Version=0.3.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\Dependencies\ColossalManaged.dll</HintPath>
     </Reference>
-    <Reference Include="EManagersLib.API">
-      <HintPath>..\Dependencies\EManagersLib.API.dll</HintPath>
-    </Reference>
     <Reference Include="ICities, Version=1.16.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\Dependencies\ICities.dll</HintPath>
     </Reference>
@@ -121,7 +118,6 @@
       del /Q "%25DEPLOYDIR%25*"
       xcopy /y "$(TargetDir)BrokenNodeDetector.dll" "%25DEPLOYDIR%25"
       xcopy /y "$(TargetDir)CitiesHarmony.API.dll" "%25DEPLOYDIR%25"
-      xcopy /y "$(TargetDir)EManagersLib.API.dll" "%25DEPLOYDIR%25"
 
       set DEPLOYDIR=</PostBuildEvent>
   </PropertyGroup>
