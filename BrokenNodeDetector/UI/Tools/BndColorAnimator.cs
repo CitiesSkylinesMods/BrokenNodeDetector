@@ -7,6 +7,7 @@ using UnityEngine;
 namespace BrokenNodeDetector.UI.Tools {
     public class BndColorAnimator : Singleton<BndColorAnimator> {
         private readonly List<AnimationInfo> _animatorInfos = new List<AnimationInfo>();
+        private readonly NameMatcher _matcher = new NameMatcher();
 
         public static void Animate(Action<Color> target, AnimatedColor color) {
             instance.AnimateInternal(null, target, color, null);
@@ -34,8 +35,8 @@ namespace BrokenNodeDetector.UI.Tools {
         }
 
         private bool InternalIsAnimating(string animationName) {
-            AnimationInfo animationInfo =
-                this._animatorInfos.Find(info => info.AnimationName == animationName);
+            _matcher.name = animationName;
+            AnimationInfo animationInfo = this._animatorInfos.Find(_matcher.Match);
             return animationInfo != null;
         }
 
@@ -43,7 +44,8 @@ namespace BrokenNodeDetector.UI.Tools {
                                      Action<Color> target,
                                      AnimatedColor v,
                                      Action completed) {
-            AnimationInfo animationInfo = _animatorInfos.Find(info => info.AnimationName == animationName);
+            _matcher.name = animationName;
+            AnimationInfo animationInfo = _animatorInfos.Find(_matcher.Match);
             if (animationName != null && animationInfo != null) {
                 animationInfo.Value = v;
                 animationInfo.Completed = completed;
@@ -97,6 +99,7 @@ namespace BrokenNodeDetector.UI.Tools {
         }
 
         private void OnDestroy() {
+            _animatorInfos.Clear();
             GetType().GetField("sInstance", BindingFlags.NonPublic | BindingFlags.Static)
                 ?.SetValue(null, null);
         }
@@ -109,6 +112,13 @@ namespace BrokenNodeDetector.UI.Tools {
             public AnimatedColor Value;
 
             public Action Completed;
+        }
+
+        private class NameMatcher {
+            public string name;
+            public bool Match(AnimationInfo info) {
+                return info.AnimationName == name;
+            }
         }
     }
 }

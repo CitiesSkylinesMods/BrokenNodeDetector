@@ -116,6 +116,7 @@ namespace BrokenNodeDetector.UI.Tools.StuckCimsTool {
 
         private void BuildResultTemplate() {
             _template = new GameObject("StuckCimsTemplate").AddComponent<UIPanel>();
+            _template.transform.SetParent(_defaultGameObject.transform, true);
             _template.width = 400;
             _template.height = 50;
             UILabel label = _template.AddUIComponent<UILabel>();
@@ -145,6 +146,7 @@ namespace BrokenNodeDetector.UI.Tools.StuckCimsTool {
 
         private void BuildPrepareTemplate() {
             _templatePrepare = new GameObject("StuckCimsPrepareTemplate").AddComponent<UIPanel>();
+            _templatePrepare.gameObject.transform.SetParent(_defaultGameObject.transform, true);
             _templatePrepare.width = 400;
             _templatePrepare.height = 50;
             UILabel label = _templatePrepare.AddUIComponent<UILabel>();
@@ -158,6 +160,7 @@ namespace BrokenNodeDetector.UI.Tools.StuckCimsTool {
 
         private void BuildRowTemplate() {
             UIPanel resultRow = new GameObject("StuckCimsRowTemplate").AddComponent<UIPanel>();
+            resultRow.gameObject.transform.SetParent(_defaultGameObject.transform, true);
             resultRow.name = RESULT_ROW;
             resultRow.width = 400;
             resultRow.height = 40;

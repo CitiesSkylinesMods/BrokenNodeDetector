@@ -20,6 +20,7 @@ namespace BrokenNodeDetector.UI {
 
         public override void Awake() {
             base.Awake();
+            name = "BND_MainPanel";
             autoLayout = false;
             width = PANEL_WIDTH;
             height = PANEL_HEIGHT;
@@ -197,6 +198,8 @@ namespace BrokenNodeDetector.UI {
 
         private void OnResultsClose(bool updateHeight = false) {
             _returnButton.Hide();
+            _preparePanel.CancelPrepare();
+            _preparePanel.Hide();
             RunFadeInOutAnimations(_resultsPanel, _detectorsPanel);
             if (BndResultHighlightManager.instance) {
                 BndResultHighlightManager.instance.enabled = false;

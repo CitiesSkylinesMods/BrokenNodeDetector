@@ -173,6 +173,7 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedPublicTransportStopsTool {
 
         private void BuildTemplate() {
             _template = new GameObject("DisconnectedPTStopTemplate").AddComponent<UIPanel>();
+            _template.transform.SetParent(_defaultGameObject.transform, true);
             _template.width = 400;
             _template.height = 50;
             UILabel label = _template.AddUIComponent<UILabel>();

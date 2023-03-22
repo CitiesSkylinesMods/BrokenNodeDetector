@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading;
 using ColossalFramework.UI;
@@ -29,13 +28,19 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedBuildingsTool {
             ResetState();
 
             _progress = 0f;
-            AsyncTask<float> asyncTask = SimulationManager.instance.AddAction(ProcessInternal());
+            AsyncTask<float> asyncTask = SimulationManager.instance.AddAction(CheckRoadAccess());
             while (!asyncTask.completed) {
+                yield return _progress;
+            }
+            
+            _progress = 0f;
+            AsyncTask<float> asyncTask2 = SimulationManager.instance.AddAction(CollectDisconnectedBuildings());
+            while (!asyncTask2.completed) {
                 yield return _progress;
             }
 
             yield return 1.0f;
-            IsProcessing = true;
+            IsProcessing = false;
         }
 
         public override void InitResultsView(UIComponent component) {
@@ -63,65 +68,75 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedBuildingsTool {
             templateInstance.Find<UIButton>("MoveNext").eventClick += MoveNextBuildingButtonClick;
         }
 
-        private IEnumerator<float> ProcessInternal() {
+        private IEnumerator<float> CheckRoadAccess() {
             BuildingManager bm = BuildingManager.instance;
             float searchStep = 1.0f / bm.m_buildings.m_size;
+            
+            ProgressMessage = $"Processing...0% Pass 1/2";
+            Building[] mBuffer = bm.m_buildings.m_buffer;
+            for (int i = 1; i < mBuffer.Length; i++) {
+
+                if ((mBuffer[i].m_flags & (Building.Flags.Created | Building.Flags.Deleted)) == Building.Flags.Created &&
+                    mBuffer[i].Info
+                    ) {
+                    mBuffer[i].Info.m_buildingAI.CheckRoadAccess((ushort)i, ref mBuffer[i]);
+                }
+
+                float searchProgress = searchStep * i;
+                if (i % 64 == 0) {
+                    ProgressMessage = $"Processing...{searchProgress * 100:F0}% Pass 1/2";
+                    Thread.Sleep(1);
+                    _progress = searchProgress;
+                }
+            }
+            ProgressMessage = $"Processing...100% Pass 1/2";
+            
+            yield return 1.0f;
+        }
+
+        private IEnumerator<float> CollectDisconnectedBuildings() {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("[BND] Scanning for disconnected buildings");
             sb.AppendLine("[BND] ");
             sb.AppendLine("[BND] =( Building ID )===( Location )=");
             sb.AppendLine();
-            ProgressMessage = $"Processing...0%";
+            BuildingManager bm = BuildingManager.instance;
             Building[] mBuffer = bm.m_buildings.m_buffer;
+            float searchStep = 1.0f / bm.m_buildings.m_size;
+            
+            ProgressMessage = "Processing...0% Pass 2/2";
+            _progress = 0f;
+            
             int counter = 0;
-            MethodInfo findRoadAccess = typeof(PlayerBuildingAI).GetMethod("FindRoadAccess", BindingFlags.Instance | BindingFlags.NonPublic);
-            for (int i = 0; i < mBuffer.Length; i++) {
-                Building building = mBuffer[i];
+            for (int i = 1; i < mBuffer.Length; i++) {
 
-                if ((building.m_flags & Building.Flags.Created) != 0 && building.Info) {
-                    if (building.Info.m_buildingAI is PlayerBuildingAI) {
+                if ((mBuffer[i].m_flags & (Building.Flags.Created | Building.Flags.Deleted)) == Building.Flags.Created &&
+                    mBuffer[i].Info
+                    ) {
+                    bool notConnected = ((mBuffer[i].m_flags & Building.Flags.RoadAccessFailed) != Building.Flags.None &&
+                                         ((mBuffer[i].m_problems.m_Problems1 & (Notification.Problem1.RoadNotConnected | Notification.Problem1.PathNotConnected)) != Notification.Problem1.None ||
+                                          (mBuffer[i].m_problems.m_Problems2 & (Notification.Problem2.NotInPedestrianZone | Notification.Problem2.CannotBeReached)) != Notification.Problem2.None));
+
+                    if (notConnected) {
                         counter++;
-                        PlayerBuildingAI buildingAI = building.Info.m_buildingAI as PlayerBuildingAI;
-                        bool connected = true;
-                        if ((building.m_flags & Building.Flags.Collapsed) == Building.Flags.None && buildingAI.RequireRoadAccess()) {
-                            Vector3 position = buildingAI.m_info.m_zoningMode != BuildingInfo.ZoningMode.CornerLeft
-                                ? (buildingAI.m_info.m_zoningMode != BuildingInfo.ZoningMode.CornerRight
-                                    ? building.CalculateSidewalkPosition(0.0f, 4f)
-                                    : building.CalculateSidewalkPosition(building.Width * -4f, 4f))
-                                : building.CalculateSidewalkPosition(building.Width * 4f, 4f);
-                            object[] args = { (ushort)i, building, position, null, true, false };
-                            if (!(bool)findRoadAccess.Invoke(buildingAI, args))
-                                connected = false;
-                        }
-
-                        if (!connected) {
-                            _disconnectedBuildings.Add((ushort)i, building.m_position);
-                            sb.AppendLine("==(" + i + ")===(" + building.m_position + ")=");
-                            sb.Append("building ")
-                                .Append(" " + (building.Info ? building.Info.m_class.name : "") + " ")
-                                .Append(building.m_flags.ToString())
-                                .Append(" [name: ").Append(building.Info.name).Append("]");
-                            sb.AppendLine("---------------------------------------");
-                        }
-                    } else if ((building.m_flags & Building.Flags.RoadAccessFailed) != 0 || (building.m_problems.m_Problems1 & Notification.Problem1.RoadNotConnected) != 0) {
-                        _disconnectedBuildings.Add((ushort)i, building.m_position);
-                        sb.AppendLine("==(" + i + ")===(" + building.m_position + ")=");
-                        sb.Append("building ")
-                            .Append(" " + (building.Info ? building.Info.m_class.name : "") + " ")
-                            .Append(building.m_flags.ToString())
-                            .Append(" [name: ").Append(building.Info.name).Append("]");
+                        _disconnectedBuildings.Add((ushort)i, mBuffer[i].m_position);
+                        sb.AppendLine("==(" + i + ")===" + mBuffer[i].m_position + "==");
+                        sb.Append("Building [ItemClass: ")
+                            .Append((mBuffer[i].Info ? mBuffer[i].Info.m_class.name : "") + "] [Flags: ")
+                            .Append(mBuffer[i].m_flags.ToString()).Append("] [Problems: ").Append(mBuffer[i].m_problems.ToString())
+                            .Append("] [Name: ").Append(mBuffer[i].Info.name).Append("]");
                         sb.AppendLine("---------------------------------------");
                     }
                 }
 
                 float searchProgress = searchStep * i;
-                if (i % 32 == 0) {
-                    ProgressMessage = $"Processing...{searchProgress * 100:F0}%";
+                if (i % 128 == 0) {
+                    ProgressMessage = $"Processing...{searchProgress * 100:F0}% Pass 2/2";
                     Thread.Sleep(1);
                     _progress = searchProgress;
                 }
             }
-            ProgressMessage = $"Processing...100%";
+            ProgressMessage = $"Processing...100% Pass 2/2";
 
             Debug.Log("[BND] Disconnected building instances count: " + counter);
             Debug.Log("[BND] Scan report\n" + sb + "\n\n=======================================================");
@@ -130,6 +145,7 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedBuildingsTool {
 
         private void BuildTemplate() {
             _template = new GameObject("DisconnectedBuildingTemplate").AddComponent<UIPanel>();
+            _template.transform.SetParent(_defaultGameObject.transform, true);
             _template.width = 400;
             _template.height = 50;
             UILabel label = _template.AddUIComponent<UILabel>();
@@ -150,20 +166,22 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedBuildingsTool {
             UIPanel buildingPanel = _template.AddUIComponent<UIPanel>();
             buildingPanel.width = 400;
             buildingPanel.height = 40;
-            buildingPanel.relativePosition = new Vector2(10, 45);
+            buildingPanel.relativePosition = new Vector2(15, 45);
             buildingPanel.name = "BuildingPanel";
             
             UILabel buildingId = buildingPanel.AddUIComponent<UILabel>();
+            buildingId.processMarkup = true;
             buildingId.prefix = "Building ID: ";
-            buildingId.relativePosition = new Vector2(20, 10);
+            buildingId.relativePosition = new Vector2(0, 10);
             buildingId.name = "BuildingID";
-            buildingId.textScale = 0.9f;
+            buildingId.textScale = 0.8f;
             
             UILabel buildingPos = buildingPanel.AddUIComponent<UILabel>();
+            buildingPos.processMarkup = true;
             buildingPos.prefix = "Position: ";
-            buildingPos.relativePosition = new Vector2(200, 10);
+            buildingPos.relativePosition = new Vector2(150, 10);
             buildingPos.name = "BuildingPosition";
-            buildingPos.textScale = 0.9f;
+            buildingPos.textScale = 0.8f;
             
             buildingPanel.Hide();
         }
@@ -215,6 +233,7 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedBuildingsTool {
             if (_disconnectedBuildings.Count == 0) {
                 ResetState();
                 label.text = "Great! Nothing found :-)";
+                label.textColor = new Color(0f, 0.81f, 0.05f);
                 label.parent.height = 50;
                 label.relativePosition = Vector3.zero;
                 label.color = Color.white;
@@ -226,16 +245,16 @@ namespace BrokenNodeDetector.UI.Tools.DisconnectedBuildingsTool {
             UILabel buildingId = buildingPanel.Find<UILabel>("BuildingID");
             UILabel buildingPos = buildingPanel.Find<UILabel>("BuildingPosition");
             if (_currentBuilding != 0 && _disconnectedBuildings.TryGetValue(_currentBuilding, out Vector3 position)) {
-                buildingId.text = _currentBuilding.ToString();
-                buildingPos.text = position.ToString();
+                buildingId.text = $"<color #FFF000>{_currentBuilding.ToString()}</color>";
+                buildingPos.text = $"<color #FFF000>{position.ToString()}</color>";
             } else {
                 buildingId.text = " ";
                 buildingPos.text = " ";
             }
 
-            label.relativePosition = new Vector3(20, 0);
-            label.text = $"{_disconnectedBuildings.Count} possibly disconnected building(s)";
-            label.color = Color.yellow;
+            label.relativePosition = new Vector3(15, 0);
+            label.processMarkup = true;
+            label.text = $"<color #FFAA00>{_disconnectedBuildings.Count}</color> possibly disconnected building(s)";
         }
 
         private void UpdateBuildingButtons(UIComponent moveNextButton) {

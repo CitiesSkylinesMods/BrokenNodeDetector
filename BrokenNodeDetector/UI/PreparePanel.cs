@@ -48,6 +48,7 @@ namespace BrokenNodeDetector.UI {
         public void CancelPrepare() {
             if (_preparing && _prepareCoroutine != null) {
                 StopCoroutine(_prepareCoroutine);
+                _preparing = false;
             }
         }
         

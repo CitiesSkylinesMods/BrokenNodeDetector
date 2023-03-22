@@ -1,3 +1,4 @@
+#if BROKEN_PROPS_SCANNER
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -170,3 +171,4 @@ namespace BrokenNodeDetector.UI.Tools.BrokenPropsTool {
         }
     }
 }
+#endif
